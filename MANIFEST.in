@@ -1,0 +1,4 @@
+include *.rst
+include LICENSE
+include scripts/ceph-doctor
+include tox.ini
