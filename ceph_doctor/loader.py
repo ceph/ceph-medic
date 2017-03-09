@@ -3,7 +3,6 @@ JSON Loading utilities
 """
 import os
 import imp
-from ceph_doctor.exceptions import Forbidden, InvalidFormat
 
 
 def load_config(filepath, **kw):
