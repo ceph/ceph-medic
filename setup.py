@@ -1,5 +1,5 @@
 from setuptools import setup, find_packages
-import os
+import re
 import sys
 
 
@@ -8,6 +8,7 @@ pyversion = sys.version_info[:2]
 
 module_file = open("ceph_doctor/__init__.py").read()
 metadata = dict(re.findall("__([a-z]+)__\s*=\s*'([^']+)'", module_file))
+long_description = open('README.rst').read()
 
 setup(
     name='ceph-doctor',
@@ -17,7 +18,7 @@ setup(
     author='Alfredo Deza',
     author_email='contact@redhat.com',
     description='detect common issues with ceph clusters',
-    long_description=read('README.rst'),
+    long_description=long_description,
     license='MIT',
     keywords='ceph doctor',
     url="https://github.com/ceph/ceph-doctor",
@@ -25,6 +26,7 @@ setup(
 
     install_requires=[
         'setuptools',
+        'tambo',
     ] + install_requires,
 
     tests_require=[
