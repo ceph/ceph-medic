@@ -1,5 +1,5 @@
 import sys
-from ceph_doctor.util import red_arrow
+from ceph_doctor import terminal
 from functools import wraps
 
 
@@ -66,6 +66,6 @@ def make_exception_message(exc):
     so it is readable enough.
     """
     if str(exc):
-        return '%s %s: %s\n' % (red_arrow, exc.__class__.__name__, exc)
+        return '%s %s: %s\n' % (terminal.red_arrow, exc.__class__.__name__, exc)
     else:
-        return '%s %s\n' % (red_arrow, exc.__class__.__name__)
+        return '%s %s\n' % (terminal.red_arrow, exc.__class__.__name__)
