@@ -66,30 +66,36 @@ a ``ceph.conf`` file would be in a monitor node::
      'mon': {
          'node3': {
              'paths': {
-                 '/etc/ceph/ceph.conf':
-                    'contents': "[global]\nfsid = f05294bd-6e9d-4883-9819-c2800d4d7962\nmon_initial_members = node3\nmon_host = 192.168.111.102\nauth_cluster_required = cephx\nauth_service_required = cephx\nauth_client_required = cephx\n",
-                    'owner': 'ceph',
-                    'group': 'ceph',
-                    'n_fields' : 19 ,
-                    'n_sequence_fields' : 10 ,
-                    'n_unnamed_fields' : 3 ,
-                    'st_atime' : 1490714187.0 ,
-                    'st_birthtime' : 1463607160.0 ,
-                    'st_blksize' : 4096 ,
-                    'st_blocks' : 0 ,
-                    'st_ctime' : 1490295294.0 ,
-                    'st_dev' : 16777220 ,
-                    'st_flags' : 1048576 ,
-                    'st_gen' : 0 ,
-                    'st_gid' : 0 ,
-                    'st_ino' : 62858421 ,
-                    'st_mode' : 16877 ,
-                    'st_mtime' : 1490295294.0 ,
-                    'st_nlink' : 26 ,
-                    'st_rdev' : 0 ,
-                    'st_size' : 884 ,
-                    'st_uid' : 0 ,
-                    'exception': {},
-                }
-            }
-        }
+                 '/etc/ceph/': {
+                    'dirs': [],
+                    'files': {
+                        '/etc/ceph/ceph.conf': {
+                            'contents': "[global]\nfsid = f05294bd-6e9d-4883-9819-c2800d4d7962\nmon_initial_members = node3\nmon_host = 192.168.111.102\nauth_cluster_required = cephx\nauth_service_required = cephx\nauth_client_required = cephx\n",
+                            'owner': 'ceph',
+                            'group': 'ceph',
+                            'n_fields' : 19 ,
+                            'n_sequence_fields' : 10 ,
+                            'n_unnamed_fields' : 3 ,
+                            'st_atime' : 1490714187.0 ,
+                            'st_birthtime' : 1463607160.0 ,
+                            'st_blksize' : 4096 ,
+                            'st_blocks' : 0 ,
+                            'st_ctime' : 1490295294.0 ,
+                            'st_dev' : 16777220 ,
+                            'st_flags' : 1048576 ,
+                            'st_gen' : 0 ,
+                            'st_gid' : 0 ,
+                            'st_ino' : 62858421 ,
+                            'st_mode' : 16877 ,
+                            'st_mtime' : 1490295294.0 ,
+                            'st_nlink' : 26 ,
+                            'st_rdev' : 0 ,
+                            'st_size' : 884 ,
+                            'st_uid' : 0 ,
+                            'exception': {},
+                         }
+                     }
+                 }
+             }
+         }
+     }
