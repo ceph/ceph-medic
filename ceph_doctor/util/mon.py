@@ -1,21 +1,27 @@
 import remoto
 import json
 import ceph_doctor
+from ceph_doctor import terminal
+from ceph_doctor import errors
 
 
 def get_mon_report(conn):
+    command = [
+        'ceph',
+        '--cluster=%s' % ceph_doctor.metadata['cluster_name'],
+        'report'
+    ]
     out, err, code = remoto.process.check(
         conn,
-        [
-            'ceph',
-            '--cluster=%s' % ceph_doctor.config['cluster_name'],
-            'report'
-        ],
+        command
     )
 
     if code > 0:
+        terminal.error('failed to connect to the cluster to fetch a report from the monitor')
+        terminal.error('command: %s' % ' '.join(command))
         for line in err:
-            print line
+            terminal.error(line)
+        raise RuntimeError()
 
     try:
         return json.loads(b''.join(out).decode('utf-8'))
