@@ -12,6 +12,7 @@ def get_connection(hostname, username=None, threads=5, use_sudo=None, detect_sud
     A very simple helper, meant to return a connection
     that will know about the need to use sudo.
     """
+    fallback = kw.get('fallback', [])
     if kw.get('logger') is False:  # explicitly disable remote logging
         remote_logger = None
     else:
