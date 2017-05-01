@@ -1,4 +1,4 @@
 include *.rst
 include LICENSE
-include scripts/ceph-doctor
+include scripts/ceph-medic
 include tox.ini

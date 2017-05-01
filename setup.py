@@ -6,12 +6,12 @@ import sys
 install_requires = []
 pyversion = sys.version_info[:2]
 
-module_file = open("ceph_doctor/__init__.py").read()
+module_file = open("ceph_medic/__init__.py").read()
 metadata = dict(re.findall("__([a-z]+)__\s*=\s*'([^']+)'", module_file))
 long_description = open('README.rst').read()
 
 setup(
-    name='ceph-doctor',
+    name='ceph-medic',
     version = metadata['version'],
     packages=find_packages(),
 
@@ -21,7 +21,7 @@ setup(
     long_description=long_description,
     license='MIT',
     keywords='ceph doctor',
-    url="https://github.com/ceph/ceph-doctor",
+    url="https://github.com/ceph/ceph-medic",
     zip_safe = False,
 
     install_requires=[
@@ -34,7 +34,7 @@ setup(
         'tox',
     ],
 
-    scripts = ['bin/ceph-doctor'],
+    scripts = ['bin/ceph-medic'],
     classifiers = [
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',

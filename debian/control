@@ -1,4 +1,4 @@
-Source: ceph-doctor
+Source: ceph-medic
 Maintainer: Alfredo Deza <adeza@redhat.com>
 Uploaders: Alfredo Deza <adeza@redhat.com>
 Section: admin
@@ -7,10 +7,10 @@ Build-Depends: debhelper (>= 7), python-setuptools, git
 X-Python-Version: >= 2.7
 Standards-Version: 3.9.2
 Homepage: http://ceph.com/
-Vcs-Git: git://github.com/ceph/ceph-doctor.git
-Vcs-Browser: https://github.com/ceph/ceph-doctor
+Vcs-Git: git://github.com/ceph/ceph-medic.git
+Vcs-Browser: https://github.com/ceph/ceph-medic
 
-Package: ceph-doctor
+Package: ceph-medic
 Architecture: all
 Depends: python,
          python-setuptools,
@@ -18,5 +18,5 @@ Depends: python,
          python-tambo,
          ${misc:Depends},
          ${python:Depends}
-Description: ceph-doctor is a tool to determine common issues on Ceph storage
+Description: ceph-medic is a tool to determine common issues on Ceph storage
 clusters.

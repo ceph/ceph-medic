@@ -1,5 +1,5 @@
 #
-# spec file for package ceph-doctor
+# spec file for package ceph-medic
 #
 
 %if ! (0%{?fedora} > 12 || 0%{?rhel} > 5)
@@ -10,7 +10,7 @@
 #################################################################################
 # common
 #################################################################################
-Name:           ceph-doctor
+Name:           ceph-medic
 Version:        0.0.1
 Release:        0
 Summary:        Find common issues on Ceph clusters
@@ -56,7 +56,7 @@ An admin tool to determine common issues on Ceph storage clusters.
 
 %install
 python setup.py install --prefix=%{_prefix} --root=%{buildroot}
-install -m 0755 -D scripts/ceph-doctor $RPM_BUILD_ROOT/usr/bin
+install -m 0755 -D scripts/ceph-medic $RPM_BUILD_ROOT/usr/bin
 
 %clean
 [ "$RPM_BUILD_ROOT" != "/" ] && rm -rf "$RPM_BUILD_ROOT"
@@ -64,7 +64,7 @@ install -m 0755 -D scripts/ceph-doctor $RPM_BUILD_ROOT/usr/bin
 %files
 %defattr(-,root,root)
 %doc LICENSE README.rst
-%{_bindir}/ceph-doctor
+%{_bindir}/ceph-medic
 %{python_sitelib}/*
 
 %changelog

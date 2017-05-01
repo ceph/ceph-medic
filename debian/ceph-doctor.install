@@ -1,1 +1,1 @@
-./scripts/ceph-doctor  /usr/bin
+./scripts/ceph-medic  /usr/bin
