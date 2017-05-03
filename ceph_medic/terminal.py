@@ -147,8 +147,8 @@ class LogMessage(object):
             self.writer.write(self.line())
 
     def get_config_level(self):
-        import ceph_doctor
-        level = ceph_doctor.config.get('verbosity', 'error')
+        import ceph_medic
+        level = ceph_medic.config.get('verbosity', 'error')
         return _reverse_level_names.get(level, 4)
 
 
