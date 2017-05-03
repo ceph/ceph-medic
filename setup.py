@@ -27,6 +27,7 @@ setup(
     install_requires=[
         'setuptools',
         'tambo',
+        'remoto',
     ] + install_requires,
 
     tests_require=[
