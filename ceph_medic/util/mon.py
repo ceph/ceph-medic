@@ -1,14 +1,13 @@
 import remoto
 import json
-import ceph_doctor
-from ceph_doctor import terminal
-from ceph_doctor import errors
+import ceph_medic
+from ceph_medic import terminal
 
 
 def get_mon_report(conn):
     command = [
         'ceph',
-        '--cluster=%s' % ceph_doctor.metadata['cluster_name'],
+        '--cluster=%s' % ceph_medic.metadata['cluster_name'],
         'report'
     ]
     out, err, code = remoto.process.check(
