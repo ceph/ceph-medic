@@ -1,6 +1,7 @@
 config = {
     'verbosity': 'info',
     'nodes': {},
+    'hosts_file': None,
 }
 
 metadata = {'osds':{}, 'mons':{}, 'nodes': {}}
