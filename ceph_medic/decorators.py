@@ -1,5 +1,5 @@
 import sys
-from ceph_doctor import terminal
+from ceph_medic import terminal
 from functools import wraps
 
 

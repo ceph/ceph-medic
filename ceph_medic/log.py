@@ -4,6 +4,7 @@ import logging
 BASE_FORMAT = "[%(name)s][%(levelname)-6s] %(message)s"
 FILE_FORMAT = "[%(asctime)s]" + BASE_FORMAT
 
+
 def setup():
     root_logger = logging.getLogger()
 
@@ -12,7 +13,8 @@ def setup():
     date = datetime.strftime(datetime.utcnow(), '%Y-%m-%d')
 
     # File Logger
-    fh = logging.FileHandler('ceph-doctor-%s.log' % date)
+    # XXX this needs to have a configurable location
+    fh = logging.FileHandler('ceph-medic-%s.log' % date)
     fh.setLevel(logging.DEBUG)
     fh.setFormatter(logging.Formatter(FILE_FORMAT))
 

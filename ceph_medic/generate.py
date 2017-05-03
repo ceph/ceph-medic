@@ -1,6 +1,6 @@
 import sys
-import ceph_doctor
-from ceph_doctor.connection import get_connection
+import ceph_medic
+from ceph_medic.connection import get_connection
 import remoto
 import json
 from tambo import Transport
@@ -60,8 +60,8 @@ cluster.
 
 Usage:
 
-    ceph-doctor generate [/path/to/ceph.conf]
-    ceph-doctor generate [MONITOR HOST]
+    ceph-medic generate [/path/to/ceph.conf]
+    ceph-medic generate [MONITOR HOST]
 
 Loaded Config Path: {config_path}
 
@@ -73,14 +73,14 @@ Loaded Config Path: {config_path}
     def _help(self):
         skip_internal = ['__file__', 'config_path', 'verbosity']
         node_section = []
-        for daemon, node in ceph_doctor.config['nodes'].items():
+        for daemon, node in ceph_medic.config['nodes'].items():
             if daemon in skip_internal or not node:
                 continue
             header = "\n* %s:\n" % daemon
-            body = '\n'.join(["    %s" % n for n in ceph_doctor.config['nodes'][daemon].keys()])
+            body = '\n'.join(["    %s" % n for n in ceph_medic.config['nodes'][daemon].keys()])
             node_section.append(header+body+'\n')
         return self.long_help.format(
-            config_path=ceph_doctor.config['config_path']
+            config_path=ceph_medic.config['config_path']
         )
 
     def main(self):
@@ -101,7 +101,10 @@ Loaded Config Path: {config_path}
 
         with get_connection(node) as conn:
             report = get_mon_report(conn)
-            mons = report['monmap']['mons']
+            try:
+                mons = report['monmap']['mons']
+            except KeyError:
+                raise SystemExit(report)
             inventory['mons'] = [i['name'] for i in mons]
             osds = report['osd_metadata']
             inventory['osds'] = [i['hostname'] for i in osds]
