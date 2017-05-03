@@ -1,8 +1,9 @@
 import logging
 import socket
 import remoto
-import ceph_doctor
-from ceph_doctor import terminal
+from execnet.gateway_bootstrap import HostNotFound
+import ceph_medic
+from ceph_medic import terminal
 
 logger = logging.getLogger(__name__)
 
@@ -13,6 +14,7 @@ def get_connection(hostname, username=None, threads=5, use_sudo=None, detect_sud
     that will know about the need to use sudo.
     """
     fallback = kw.get('fallback', [])
+    hosts = [hostname] + fallback
     if kw.get('logger') is False:  # explicitly disable remote logging
         remote_logger = None
     else:
@@ -20,7 +22,11 @@ def get_connection(hostname, username=None, threads=5, use_sudo=None, detect_sud
 
     if username:
         hostname = "%s@%s" % (username, hostname)
+
+    if ceph_medic.config.get('ssh_config'):
+        hostname = "-F %s %s" % (ceph_medic.config.get('ssh_config'), hostname)
     try:
+
         conn = remoto.Connection(
             hostname,
             logger=remote_logger,
@@ -43,7 +49,7 @@ def get_connection(hostname, username=None, threads=5, use_sudo=None, detect_sud
                     cluster_name = i.split('.conf')[0]
                     logger.warning('inferred %s as the cluster name', cluster_name)
                     terminal.warning('inferred %s as the cluster name' % cluster_name)
-        ceph_doctor.metadata['cluster_name'] = cluster_name
+        ceph_medic.metadata['cluster_name'] = cluster_name
         return conn
     except Exception as error:
         msg = "connecting to host: %s " % hostname
@@ -51,6 +57,28 @@ def get_connection(hostname, username=None, threads=5, use_sudo=None, detect_sud
         logger.error(msg)
         logger.error(errors)
         raise error
+
+
+def initiate_connection(hosts, remote_logger, threads, detect_sudo):
+    """
+    Loop over a list of hosts, we do this so that fallbacks (e.g. [hostname,
+    IP]) are handled nicer, one after the other, while logging everything.
+    First one to go through wins the connection which is immediately returned
+    """
+    for host in hosts:
+        try:
+            logger.debug('attempting connection to host: %s', host)
+            return remoto.Connection(
+                host,
+                logger=remote_logger,
+                threads=threads,
+                detect_sudo=detect_sudo,
+            )
+        except HostNotFound as error:
+            logger.warning('connection failed with error: %s', str(error))
+        except Exception as error:
+            logger.exception('unhandled error when trying to connect')
+            raise
 
 
 def get_local_connection(logger, use_sudo=False):
