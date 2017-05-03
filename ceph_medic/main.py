@@ -1,28 +1,37 @@
+from ceph_medic import check, generate, log
 import sys
 import os
-
 from tambo import Transport
-import ceph_doctor
-from ceph_doctor import check, generate
-from ceph_doctor.decorators import catches
-from ceph_doctor.loader import load_config
+from execnet.gateway_bootstrap import HostNotFound
+import ceph_medic
+from ceph_medic.decorators import catches
+#from ceph_medic.loader import load_config
+from ceph_medic.util import configuration
+from ceph_medic import terminal
+
+log.setup()
 
 
-class Doctor(object):
+class Medic(object):
     _help = """
-ceph-doctor: A utility to run system checks on a Ceph cluster.
+ceph-medic: A utility to run system checks on a Ceph cluster.
 
 Version: {version}
 
 Global Options:
---ignore    Comma-separated list of errors and warnings to ignore.
-
---config    Path to a specific configuration file. Overrides the default:
-            $HOME/.cephdoctor.
+  --ignore              Comma-separated list of errors and warnings to ignore.
+  --config              Path to a specific configuration file. Overrides the default:
+                        $HOME/.cephdoctor.
+  --version, version    Shows the current installed version
+  --inventory           Prefer a ceph-ansible inventory (hosts) file instead of default
+                        (cwd, /etc/ansible/hosts) locations
+  -s, no-capture        Avoids capturing stderr and stdout
+  --debug               Doesn't remove internal tracebacks
 
 {sub_help}
 
-Loaded Config Path: {config_path}
+{config_path_header}: {config_path}
+{hosts_file_header}: {hosts_file}
     """
     mapper = {
         'check': check.Check,
@@ -36,34 +45,61 @@ Loaded Config Path: {config_path}
             self.main(argv)
 
     def help(self, sub_help=None):
+        if self.hosts_file is None:
+            hosts_file_header = terminal.red('Loaded Hosts file')
+            hosts_file = 'No hosts file found in cwd, /etc/ansible/, or configured'
+        else:
+            hosts_file_header = terminal.green('Loaded Hosts file')
+            hosts_file = self.hosts_file
         return self._help.format(
-            version=ceph_doctor.__version__,
+            version=ceph_medic.__version__,
             config_path=self.config_path,
+            config_path_header=terminal.green('Loaded Config Path'),
+            hosts_file=hosts_file,
+            hosts_file_header=hosts_file_header,
             sub_help=sub_help
         )
 
-    @catches(KeyboardInterrupt)
+    @catches((RuntimeError, KeyboardInterrupt, HostNotFound))
     def main(self, argv):
-        options = ['--ignore', '--config']
+        options = ['--ssh-config', '--inventory', '--ignore', '--config', 'no-capture', '-s', '--debug']
         parser = Transport(
             argv, options=options,
             check_help=False,
             check_version=False
         )
         parser.parse_args()
-        default_config_path = os.path.expanduser('~/.cephdoctor')
-        self.config_path = parser.get('--config', default_config_path)
-        parser.catch_version = ceph_doctor.__version__
+        #default_config_path = os.path.expanduser('~/.cephmedic')
+        self.config_path = parser.get('--config', configuration.location())
+        #config_path = parser.get('--config')
+
+        # load medic configuration
+        loaded_config = configuration.load(path=parser.get('--config', self.config_path))
+        # update the module-wide configuration object
+        ceph_medic.config.update(configuration.get_overrides(loaded_config))
+
+        # SSH config
+        ceph_medic.config['ssh_config'] = parser.get('--ssh-config')
+
+        # Hosts file
+        self.hosts_file = parser.get('--inventory', configuration.get_host_file())
+
+        # find the hosts files, by the CLI first, fallback to the configuration
+        # file, and lastly if none of those are found or defined, try to load
+        # from well known locations (cwd, and /etc/ansible/)
+        loaded_hosts = configuration.load_hosts(
+            parser.get('--inventory',
+                       ceph_medic.config.get('--inventory', self.hosts_file)))
+
+        ceph_medic.config['hosts_file'] = loaded_hosts.filename
+        self.hosts_file = loaded_hosts.filename
+
+        parser.catch_version = ceph_medic.__version__
         parser.mapper = self.mapper
         parser.catch_help = self.help(parser.subhelp())
         if len(argv) <= 1:
             return parser.print_help()
-        ceph_doctor.config['config_path'] = self.config_path
-        loaded_config = load_config(self.config_path)
-
-        for node_type in ['mon', 'osd', 'mds', 'rgw']:
-            ceph_doctor.config['nodes'][node_type] = loaded_config.get(node_type)
-        ceph_doctor.config['config_path'] = self.config_path
+        ceph_medic.config['config_path'] = self.config_path
         parser.dispatch()
         parser.catches_help()
         parser.catches_version()
