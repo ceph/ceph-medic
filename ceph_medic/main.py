@@ -1,6 +1,7 @@
 from ceph_medic import check, generate, log
 import sys
 import os
+from textwrap import dedent
 from tambo import Transport
 from execnet.gateway_bootstrap import HostNotFound
 import ceph_medic
@@ -32,6 +33,7 @@ Global Options:
 
 {config_path_header}: {config_path}
 {hosts_file_header}: {hosts_file}
+{configured_nodes}
     """
     mapper = {
         'check': check.Check,
@@ -57,8 +59,29 @@ Global Options:
             config_path_header=terminal.green('Loaded Config Path'),
             hosts_file=hosts_file,
             hosts_file_header=hosts_file_header,
-            sub_help=sub_help
+            sub_help=sub_help,
+            configured_nodes=self.configured_nodes
         )
+
+    @property
+    def configured_nodes(self):
+        _help = dedent("""
+            Configured nodes (loaded from inventory file):
+              OSDs: {osd_node_count}
+              MONs: {mon_node_count}
+              MGRs: {mgr_node_count}
+              MDSs: {mds_node_count}
+              RGWs: {rgw_node_count}""")
+        if self.hosts_file:  # we have nodes that have been loaded
+            nodes = ceph_medic.config['nodes']
+            return _help.format(
+                osd_node_count=len(nodes.get('osds', [])),
+                mon_node_count=len(nodes.get('mons', [])),
+                mds_node_count=len(nodes.get('mdss', [])),
+                mgr_node_count=len(nodes.get('mgrs', [])),
+                rgw_node_count=len(nodes.get('rgws', []))
+            )
+        return ''
 
     @catches((RuntimeError, KeyboardInterrupt, HostNotFound))
     def main(self, argv):
@@ -90,7 +113,7 @@ Global Options:
         loaded_hosts = configuration.load_hosts(
             parser.get('--inventory',
                        ceph_medic.config.get('--inventory', self.hosts_file)))
-
+        ceph_medic.config['nodes'] = loaded_hosts.nodes
         ceph_medic.config['hosts_file'] = loaded_hosts.filename
         self.hosts_file = loaded_hosts.filename
 
