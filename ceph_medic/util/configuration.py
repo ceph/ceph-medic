@@ -291,6 +291,7 @@ class AnsibleInventoryParser(object):
                 (groupname, state) = m.groups()
                 state = state or 'hosts'
                 self.groups[groupname] = []
+                self.nodes[groupname] = []
                 continue
             if state == 'vars':
                 continue
@@ -299,6 +300,7 @@ class AnsibleInventoryParser(object):
                 if host:
                     host_item['host'] = host
                     host_item['group'] = groupname
+                    self.nodes[groupname].append(host_item)
             if state == 'children':
                 child = self._parse_group_name(line)
                 if groupname not in self.groups:
@@ -355,6 +357,7 @@ class AnsibleInventoryParser(object):
                 # the nodes present for that one group
                 if self.hosts.get(group):
                     self.nodes[parent_group].extend(self.hosts.get(group))
+
 
     def _parse_host_definition(self, line):
         """
