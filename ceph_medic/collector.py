@@ -3,6 +3,7 @@ Collect remote information on Ceph daemons, store everything in memory and make
 it available as a global part of the module so that other checks can consume it
 """
 from ceph_medic import metadata, remote, terminal
+from ceph_medic.terminal import loader
 from ceph_medic.connection import get_connection
 from execnet.gateway_bootstrap import HostNotFound
 import logging
@@ -42,7 +43,7 @@ def collect_paths(conn):
         {
             '/etc/ceph/ceph.d/test.conf':
                 {
-                    'contents': '[osd]\nosd mkfs type = xfs\nosd mkfs options[...]',
+                    'contents': '[osd]\nosd mkfs type = xfs\nosd mkfs options[...]    ',
                     'exception': {},
                     'group': 'ceph',
                     'n_fields': 16,
@@ -73,21 +74,21 @@ def collect_paths(conn):
     """
     path_metadata = {}
     paths = {
-            "/etc/ceph": {'get_contents': True},
-            "/var/lib/ceph": {
-                'get_contents': True,
-                'skip_files': ['activate.monmap', 'superblock'],
-                'skip_dirs': ['current', 'store.db']
-            },
-            "/var/run/ceph": {'get_contents': False},
+        "/etc/ceph": {'get_contents': True},
+        "/var/lib/ceph": {
+            'get_contents': True,
+            'skip_files': ['activate.monmap', 'superblock'],
+            'skip_dirs': ['current', 'store.db']
+        },
+        "/var/run/ceph": {'get_contents': False},
     }
     for p, kw in paths.items():
         # generate the tree
         tree = conn.remote_module.path_tree(
-                p,
-                kw.get('skip_dirs'),
-                kw.get('skip_files'),
-                kw.get('get_contents')
+            p,
+            kw.get('skip_dirs'),
+            kw.get('skip_files'),
+            kw.get('get_contents')
         )
 
         files = {}
@@ -98,8 +99,8 @@ def collect_paths(conn):
         for i in tree['dirs']:
             dirs[i] = conn.remote_module.stat_path(i, None, None, False)
 
-        # actual root path
-        dirs[p] = conn.remote_module.stat_path(i, None, None, False)
+            # actual root path
+            dirs[p] = conn.remote_module.stat_path(i, None, None, False)
 
         # Now slap the files and dirs back to the path_metadata for the current node
         path_metadata[p] = {'dirs': dirs, 'files': files}
@@ -116,17 +117,21 @@ def collect():
     at ``ceph_medic.metadata``
     """
     cluster_nodes = metadata['nodes']
+    terminal.info('collecting remote node information')
     for node_type, nodes in cluster_nodes.items():
         for node in nodes:
+            hostname = node['host']
+            loader.write('Host: %-*s  connection: [%-20s]' % (20, hostname, terminal.yellow('connecting')))
             # TODO: make sure that the hostname is resolvable, trying to
             # debug SSH issues with execnet is pretty hard/impossible, use
             # util.net.host_is_resolvable
             try:
                 logger.debug('attempting connection to host: %s', node['host'])
                 conn = get_connection(node['host'])
+                loader.write('Host: %-20s  connection: [%-20s]' % (hostname, terminal.green('connected')))
             except HostNotFound:
-                logger.warning('connection failed')
-                terminal.error('failed to connect to node: %s' % node['host'])
+                logger.exception('connection failed')
+                loader.write('Host: %-20s  connection: [%-20s]' % (hostname, terminal.red('failed')))
                 continue
 
             # "import" the remote functions so that remote calls using the
@@ -136,21 +141,31 @@ def collect():
             node_metadata = {'ceph': {}}
 
             # collect paths and files first
+            loader.write('Host: %-*s  collecting: [%s]' % (20, hostname, terminal.yellow('paths')))
             node_metadata['paths'] = collect_paths(conn)
+            loader.write('Host: %-*s  collecting: [%s]' % (20, hostname, terminal.green('paths')))
 
             # TODO: collect network information, passing all the cluster_nodes
             # so that it can check for inter-node connectivity
+            loader.write('Host: %-*s  collecting: [%s]' % (20, hostname, terminal.yellow('network')))
             node_metadata['network'] = collect_network(cluster_nodes)
+            loader.write('Host: %-*s  collecting: [%s]' % (20, hostname, terminal.green('network')))
+
             # TODO: collect device information
+            loader.write('Host: %-*s  collecting: [%s]' % (20, hostname, terminal.yellow('devices')))
             node_metadata['devices'] = collect_devices()
+            loader.write('Host: %-*s  collecting: [%s]' % (20, hostname, terminal.green('paths')))
 
             # collect ceph information
             node_metadata['ceph']['version'] = remote.commands.ceph_version(conn)
+            loader.write('Host: %-*s  collecting: [%s]' % (20, hostname, terminal.green('paths')))
             node_metadata['ceph']['installed'] = remote.commands.ceph_is_installed(conn)
+            loader.write('Host: %-*s  collecting: [%s]' % (20, hostname, terminal.green('paths')))
             # send the full node metadata for global scope so that the checks
             # can consume this
             metadata[node_type][node['host']] = node_metadata
             conn.exit()
+    loader.write('Collection completed!' + ' ' *70 + '\n')
 
 
 # Network
