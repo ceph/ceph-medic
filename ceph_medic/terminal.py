@@ -77,6 +77,7 @@ yellow = lambda x: colorize.make(x).yellow
 blue = lambda x: colorize.make(x).blue
 green = lambda x: colorize.make(x).green
 red = lambda x: colorize.make(x).red
+bold = lambda x: colorize.make(x).bold
 
 
 CRITICAL = 5
@@ -103,6 +104,30 @@ _level_colors = {
     'debug'    : 'blue',
     'error'    : 'red'
 }
+
+
+class _Write(object):
+
+    def __init__(self, _writer=None, prefix='', suffix='', flush=False):
+        self._writer = _writer or sys.stdout
+        self.suffix = suffix
+        self.prefix = prefix
+        self.flush = flush
+
+    def bold(self, string):
+        self.write(bold(string))
+
+    def raw(self, string):
+        self.write(string + '\n')
+
+    def write(self, line):
+        self._writer.write(self.prefix + line + self.suffix)
+        if self.flush:
+            self._writer.flush()
+
+
+write = _Write()
+loader = _Write(prefix='\r')
 
 
 class LogMessage(object):
