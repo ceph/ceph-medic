@@ -117,11 +117,11 @@ def collect():
     at ``ceph_medic.metadata``
     """
     cluster_nodes = metadata['nodes']
-    terminal.info('collecting remote node information')
+    loader.write('collecting remote node information')
     for node_type, nodes in cluster_nodes.items():
         for node in nodes:
             hostname = node['host']
-            loader.write('Host: %-*s  connection: [%-20s]' % (20, hostname, terminal.yellow('connecting')))
+            loader.write('Host: %-20s  connection: [%-20s]' % (hostname, terminal.yellow('connecting')))
             # TODO: make sure that the hostname is resolvable, trying to
             # debug SSH issues with execnet is pretty hard/impossible, use
             # util.net.host_is_resolvable
@@ -129,9 +129,11 @@ def collect():
                 logger.debug('attempting connection to host: %s', node['host'])
                 conn = get_connection(node['host'])
                 loader.write('Host: %-20s  connection: [%-20s]' % (hostname, terminal.green('connected')))
+                loader.write('\n')
             except HostNotFound:
                 logger.exception('connection failed')
                 loader.write('Host: %-20s  connection: [%-20s]' % (hostname, terminal.red('failed')))
+                loader.write('\n')
                 continue
 
             # "import" the remote functions so that remote calls using the
