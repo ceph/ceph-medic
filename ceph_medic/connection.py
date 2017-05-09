@@ -43,12 +43,10 @@ def get_connection(hostname, username=None, threads=5, use_sudo=None, detect_sud
         cluster_name = 'ceph'
         if 'ceph.conf' not in cluster_conf_files:
             logger.warning('/etc/ceph/ceph.conf was not found, will try to infer the cluster name')
-            terminal.warning('/etc/ceph/ceph.conf was not found')
             for i in cluster_conf_files:
                 if i.endswith('conf'):
                     cluster_name = i.split('.conf')[0]
                     logger.warning('inferred %s as the cluster name', cluster_name)
-                    terminal.warning('inferred %s as the cluster name' % cluster_name)
         ceph_medic.metadata['cluster_name'] = cluster_name
         return conn
     except Exception as error:
