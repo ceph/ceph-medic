@@ -82,4 +82,6 @@ Configured Nodes:
                 for node in nodes:
                     ceph_medic.metadata['nodes'][daemon].append({'host': node['host']})
         collector.collect()
-        runner.full_run()
+        test = runner.Runner()
+        results = test.run()
+        runner.report(results)
