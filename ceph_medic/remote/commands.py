@@ -7,12 +7,20 @@ from remoto.process import check
 
 
 def ceph_version(conn):
-    output, _, _ = check(conn, ['ceph', '--version'])
-    return output[0]
+    try:
+        output, _, _ = check(conn, ['ceph', '--version'])
+        return output[0]
+    except RuntimeError as error:
+        conn.logger.exception('failed to fetch ceph version')
 
 
 def ceph_is_installed(conn):
-    stdout, stderr, exit_code = check(conn, ['which', 'ceph'])
+    try:
+        stdout, stderr, exit_code = check(conn, ['which', 'ceph'])
+    except RuntimeError as error:
+        conn.logger.exception('failed to check if ceph is available in the path')
+        # XXX this might be incorrect
+        return False
     if exit_code != 0:
         return False
     return True
