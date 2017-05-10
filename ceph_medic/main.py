@@ -85,7 +85,8 @@ Global Options:
 
     @catches((RuntimeError, KeyboardInterrupt, HostNotFound))
     def main(self, argv):
-        options = ['--ssh-config', '--inventory', '--ignore', '--config', 'no-capture', '-s', '--debug']
+        options = ['--cluster', '--ssh-config', '--inventory',
+                '--ignore', '--config', 'no-capture', '-s', '--debug']
         parser = Transport(
             argv, options=options,
             check_help=False,
@@ -103,6 +104,9 @@ Global Options:
 
         # SSH config
         ceph_medic.config['ssh_config'] = parser.get('--ssh-config')
+
+        ceph_medic.config['cluster_name'] = parser.get('--cluster')
+        ceph_medic.metadata['cluster_name'] = 'ceph'
 
         # Hosts file
         self.hosts_file = parser.get('--inventory', configuration.get_host_file())
