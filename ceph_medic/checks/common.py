@@ -6,6 +6,7 @@ from ceph_medic import metadata
 #
 
 def get_fsid(data):
+    cluster_path = '/etc/ceph/%s.conf' % metadata['cluster_name']
     contents = data['paths']['/etc/ceph']['files'][cluster_path]['contents']
     try:
         fsid_line = [i for i in contents.split('\n') if 'fsid' in i][0].split('=')[-1].strip()
@@ -51,7 +52,6 @@ def check_var_lib_ceph_permissions(host, data):
 def check_cluster_fsid(host, data):
     code = 'ECOM5'
     msg = 'fsid "%s" is different than host(s): %s'
-    cluster_path = '/etc/ceph/%s.conf' % metadata['cluster_name']
     mismatched_hosts = []
 
     current_fsid = get_fsid(data)
