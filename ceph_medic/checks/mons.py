@@ -4,6 +4,7 @@ from ceph_medic import metadata
 # Utilities
 #
 
+
 def get_secret(data):
     """
     keyring files look like::
@@ -13,13 +14,21 @@ def get_secret(data):
             caps mon = "allow *"
 
     Fetch that keyring file and extract the actual key, no spaces.
+
+    .. warning:: If multiple mon dirs exist, this utility will pick the first
+    one it finds. There are checks that will complain about multiple mon dirs
     """
     file_paths = data['paths']['/var/lib/ceph']['files'].keys()
     _path = data['paths']['/var/lib/ceph']['files']
     for _file in file_paths:
         if _file.startswith('/var/lib/ceph/mon/') and _file.endswith('keyring'):
             contents = _path[_file]['contents'].split('\n')
-            return [i for i in contents if 'key' in i][0].split(' ')[-1]
+            try:
+                return [i for i in contents if 'key' in i][0].split(' ')[-1]
+            except IndexError:
+                # is it really possible to get a keyring file that doesn't
+                # have a monitor secret?
+                return ''
 
 
 def get_monitor_dirs(dirs):
@@ -35,8 +44,12 @@ def get_monitor_dirs(dirs):
     prefix = '/var/lib/ceph/mon/'
     mon_dirs = [d for d in dirs if d.startswith(prefix)]
     for _dir in mon_dirs:
+        # splitting on prefix[-1] will give us:
+        # 'ceph-mon-1/maybe/nested' or 'ceph-mon-1'
         dirs = _dir.split(prefix)[-1].split('/')
-        found.extend(dirs)
+        # splitting again on '/' and using the first part will ensure we only
+        # get the dir
+        found.append(dirs[0])
     return set(found)
 
 
@@ -63,11 +76,11 @@ def check_mon_secret(host, data):
 # Warning Checks
 #
 
+
 def check_multiple_mon_dirs(host, data):
     code = 'WMON1'
     msg = 'multiple /var/lib/ceph/mon/* dirs found: %s'
     dirs = data['paths']['/var/lib/ceph']['dirs']
-    multiple_mons = [d for d in dirs if d.startswith('/var/lib/ceph/mon/')]
     monitor_dirs = get_monitor_dirs(dirs)
     if len(monitor_dirs) > 1:
         return code, msg % ','.join(monitor_dirs)
