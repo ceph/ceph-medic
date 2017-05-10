@@ -1,13 +1,18 @@
+import logging
 from ceph_medic import metadata, terminal, daemon_types
 from ceph_medic import checks, __version__
+
+logger = logging.getLogger(__name__)
 
 
 class Runner(object):
 
     def __init__(self):
         self.passed = 0
-        self.fail = 0
+        self.skipped = 0
+        self.failed = 0
         self.total = 0
+        self.errors = []
         self.total_hosts = len(metadata['nodes'].keys())
 
     def run(self):
@@ -18,7 +23,7 @@ class Runner(object):
         start_header()
         for daemon_type in daemon_types:
             self.run_daemons(daemon_type)
-        self.total = self.fail + self.passed
+        self.total = self.failed + self.passed
         return self
 
     def run_daemons(self, daemon_type):
@@ -37,9 +42,13 @@ class Runner(object):
         for module in modules:
             checks = collect_checks(module)
             for check in checks:
-                result = getattr(module, check)(host, data)
+                try:
+                    result = getattr(module, check)(host, data)
+                except Exception as error:
+                    logger.exception('check had an unhandled error: %s', check)
+                    self.errors.append(error)
                 if result:
-                    self.fail += 1
+                    self.failed += 1
                     if not has_error:
                         terminal.loader.write(' %s\n' % terminal.red(host))
 
@@ -57,21 +66,36 @@ class Runner(object):
             terminal.loader.write(' %s\n' % terminal.green(host))
 
 
+run_errors = """
+While running checks, ceph-medic had unhandled errors, please look at the
+configured log file and report the issue along with the traceback.
+"""
+
+
 def report(results):
-    # TODO: what about skipped checks? or hosts that we couldn't connect to?
-    if results.fail:
-        msg = terminal.red(
-            "\n%s passed %s checks failed on %s hosts" % (
-                results.passed, results.fail, results.total_hosts))
+    msg = "\n{passed}{failed}{skipped}{errors}{hosts}"
+
+    if results.failed:
+        msg = terminal.red(msg)
     else:
-        msg = terminal.green(
-            "\n%s checks passed on %s hosts" % (results.passed, results.total_hosts))
-    terminal.write.raw(msg)
+        msg = terminal.green(msg)
+
+    terminal.write.raw(
+        msg.format(
+            passed="%s passed, " % results.passed,
+            failed="%s failed, " % results.failed if results.failed else '',
+            skipped="%s skipped, " % results.skipped if results.skipped else '',
+            errors="%s errors, " % len(results.errors) if results.errors else '',
+            hosts="on %s hosts" % results.total_hosts
+        )
+    )
+    if results.errors:
+        terminal.yellow(run_errors)
 
 
 start_header_tmpl = """
 {title:=^80}
-Version: {version}
+Version: {version: >4}    Cluster Name: "{cluster_name}"
 Total hosts: [{total_hosts}]
 OSDs: {osds: >4}    MONs: {osds: >4}     Clients: {osds: >4}
 MDSs: {mdss: >4}    RGWs: {osds: >4}     MGRs: {osds: >7}
@@ -89,17 +113,21 @@ def start_header():
         title='  Starting remote check session  ',
         version=__version__,
         total_hosts=total_hosts,
+        cluster_name=metadata['cluster_name'],
         **daemon_totals))
-    terminal.write.raw('='*80)
+    terminal.write.raw('=' * 80)
 
 
 def nodes_header(daemon_type):
     readable_daemons = {
-        'rgws': 'rados gateways',
-        'mgrs': 'managers',
+        'rgws': ' rados gateways ',
+        'mgrs': ' managers ',
+        'mons': ' mons ',
+        'osds': ' osds ',
+        'clients': ' clients ',
     }
 
-    terminal.write.bold('\n[{daemon:^15}]\n'.format(
+    terminal.write.bold('\n{daemon:-^30}\n'.format(
         daemon=readable_daemons.get(daemon_type, daemon_type)))
 
 
