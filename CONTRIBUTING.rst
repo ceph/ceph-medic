@@ -1,11 +1,11 @@
-Contributing to ceph-doctor
+Contributing to ceph-medic
 ===========================
 Before any contributions, a reference ticket *must* exist. The community issue
 tracker is hosted at tracker.ceph.com
 
 To open a new issue, requests can go to:
 
-http://tracker.ceph.com/projects/ceph-doctor/issues/new
+http://tracker.ceph.com/projects/ceph-medic/issues/new
 
 
 commits
