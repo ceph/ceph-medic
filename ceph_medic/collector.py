@@ -118,8 +118,11 @@ def collect():
     """
     cluster_nodes = metadata['nodes']
     loader.write('collecting remote node information')
+    total_nodes = 0
+    failed_nodes = 0
     for node_type, nodes in cluster_nodes.items():
         for node in nodes:
+            total_nodes += 1
             hostname = node['host']
             loader.write('Host: %-20s  connection: [%-20s]' % (hostname, terminal.yellow('connecting')))
             # TODO: make sure that the hostname is resolvable, trying to
@@ -134,6 +137,7 @@ def collect():
                 logger.exception('connection failed')
                 loader.write('Host: %-20s  connection: [%-20s]' % (hostname, terminal.red('failed')))
                 loader.write('\n')
+                failed_nodes += 1
                 continue
 
             # "import" the remote functions so that remote calls using the
@@ -167,7 +171,11 @@ def collect():
             # can consume this
             metadata[node_type][node['host']] = node_metadata
             conn.exit()
-    loader.write('Collection completed!' + ' ' *70 + '\n')
+    if failed_nodes == total_nodes:
+        loader.write(terminal.red('Collection failed!') + ' ' *70 + '\n')
+        raise RuntimeError('All nodes failed to connect. Cannot run any checks')
+    else:
+        loader.write('Collection completed!' + ' ' *70 + '\n')
 
 
 # Network
