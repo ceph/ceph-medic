@@ -1,7 +1,7 @@
 import sys
 import ceph_medic
 from ceph_medic.connection import get_connection
-from ceph_medic import runner, terminal, collector
+from ceph_medic import runner, collector
 from ceph_medic.util import mon
 from tambo import Transport
 
@@ -10,6 +10,12 @@ class Check(object):
     help = "Run checks for all the configured nodes in a cluster or hosts file"
     long_help = """
 check: Run for all the configured nodes in the configuration
+
+Options:
+  --ignore              Comma-separated list of errors and warnings to ignore.
+  --monitor             Instead of connecting to hosts with an inventory file
+                        connect to a monitor
+
 
 Loaded Config Path: {config_path}
 
@@ -49,7 +55,7 @@ Configured Nodes:
         return nodes
 
     def main(self):
-        options = ['--ignore', '--config']
+        options = ['--ignore', '--monitor']
         parser = Transport(
             self.argv, options=options,
             check_version=False
@@ -60,15 +66,16 @@ Configured Nodes:
         if len(self.argv) < 1:
             return parser.print_help()
 
-        # TODO: allow to consume a hosts file from ansible for pre-configured
-        # nodes to check instead of going with the monitor always
-        monitor = ceph_medic.config.get('monitor')
-        # XXX this is not very accurate. It makes *anything* that is an extra
-        # argument think that there is a monitor being passed in which is
-        # incorrect. Should consider making this a flag or fully disable it.
-        if len(self.subcommand_args) > 1: # we probably are getting a monitor as an argument
-            monitor = self.argv[-1]
-            terminal.info(
+        configured_monitor = ceph_medic.config.get('--monitor')
+        cli_monitor = parser.get('--monitor')
+        hosts_file = ceph_medic.config['hosts_file']
+        # Always prefer an inventory file even if a monitor is pre-configured
+        # (if both are present we need to pick one)
+        # If we are getting an explicit CLI flag to consume a monitor then go with that
+        # regardless of what the config says.
+        if cli_monitor or (configured_monitor and not hosts_file):
+            monitor = cli_monitor or configured_monitor:
+            logger.info(
                 'will connect to monitor %s to gather information about nodes in the cluster' % monitor
             )
 
