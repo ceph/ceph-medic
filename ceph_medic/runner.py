@@ -12,6 +12,7 @@ class Runner(object):
         self.skipped = 0
         self.failed = 0
         self.total = 0
+        self.ignore = []
         self.errors = []
         self.total_hosts = len(metadata['nodes'].keys())
 
@@ -30,8 +31,6 @@ class Runner(object):
         if metadata[daemon_type]:  # we have nodes of this type to run
             nodes_header(daemon_type)
 
-        # naive/simple reporting for now
-
         for host, data in metadata[daemon_type].items():
             modules = [checks.common, getattr(checks, daemon_type, None)]
             self.run_host(host, data, modules)
@@ -43,16 +42,25 @@ class Runner(object):
             checks = collect_checks(module)
             for check in checks:
                 try:
+                    # TODO: figure out how to skip running a specific check if
+                    # the code is ignored, maybe introspecting the function?
                     result = getattr(module, check)(host, data)
                 except Exception as error:
                     logger.exception('check had an unhandled error: %s', check)
                     self.errors.append(error)
                 if result:
+                    code, message = result
+                    # XXX This is not ideal, we shouldn't need to get all the way here
+                    # to make sure this is actually ignored. (Or maybe it doesn't matter?)
+                    if code in self.ignore:
+                        self.skipped += 1
+                        # avoid writing anything else to the terminal, and just
+                        # go to the next check
+                        continue
                     self.failed += 1
                     if not has_error:
                         terminal.loader.write(' %s\n' % terminal.red(host))
 
-                    code, message = result
                     if code.startswith('E'):
                         code = terminal.red(code)
                     elif code.startswith('W'):
@@ -97,8 +105,8 @@ start_header_tmpl = """
 {title:=^80}
 Version: {version: >4}    Cluster Name: "{cluster_name}"
 Total hosts: [{total_hosts}]
-OSDs: {osds: >4}    MONs: {osds: >4}     Clients: {osds: >4}
-MDSs: {mdss: >4}    RGWs: {osds: >4}     MGRs: {osds: >7}
+OSDs: {osds: >4}    MONs: {mons: >4}     Clients: {clients: >4}
+MDSs: {mdss: >4}    RGWs: {rgws: >4}     MGRs: {mgrs: >7}
 """
 
 
