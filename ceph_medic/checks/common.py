@@ -6,6 +6,9 @@ from ceph_medic import metadata
 #
 
 def get_fsid(data):
+    # FIXME: might want to load this thing into ConfigParser so that we can fetch
+    # information. ceph-deploy is a good example on how to do this. See:
+    # https://github.com/ceph/ceph-deploy/blob/master/ceph_deploy/conf/ceph.py
     cluster_path = '/etc/ceph/%s.conf' % metadata['cluster_name']
     contents = data['paths']['/etc/ceph']['files'][cluster_path]['contents']
     try:
@@ -17,6 +20,7 @@ def get_fsid(data):
 #
 # Error checks
 #
+
 
 def check_ceph_conf_exists(host, data):
     cluster_conf = '/etc/ceph/%s.conf' % metadata['cluster_name']
@@ -45,7 +49,7 @@ def check_var_lib_ceph_permissions(host, data):
     group = data['paths']['/var/lib/ceph']['dirs']['/var/lib/ceph']['group']
     owner = data['paths']['/var/lib/ceph']['dirs']['/var/lib/ceph']['owner']
     if group == owner != 'ceph':
-        msg = '/var/lib/ceph has invalid ownership:  %s:%s' % (owner, group)
+        msg = '/var/lib/ceph has invalid ownership:  %s:%s, should be ceph:ceph' % (owner, group)
         return code, msg
 
 
