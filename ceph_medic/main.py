@@ -23,11 +23,12 @@ Global Options:
   --ignore              Comma-separated list of errors and warnings to ignore.
   --config              Path to a specific configuration file. Overrides the default:
                         $HOME/.cephdoctor.
+  --cluster             Use a specific cluster name (defaults to 'ceph'). Alternatively,
+                        this is infered from a conf file name in /etc/ceph/
+  --ssh-config          Specify an alternate configuration for SSH
   --version, version    Shows the current installed version
   --inventory           Prefer a ceph-ansible inventory (hosts) file instead of default
                         (cwd, /etc/ansible/hosts) locations
-  -s, no-capture        Avoids capturing stderr and stdout
-  --debug               Doesn't remove internal tracebacks
 
 {sub_help}
 
@@ -37,7 +38,8 @@ Global Options:
     """
     mapper = {
         'check': check.Check,
-        'generate': generate.Generate,
+        # TODO: this needs a bit more work, disabling for now
+        #'generate': generate.Generate,
     }
 
     def __init__(self, argv=None, parse=True):
@@ -85,17 +87,17 @@ Global Options:
 
     @catches((RuntimeError, KeyboardInterrupt, HostNotFound))
     def main(self, argv):
-        options = ['--cluster', '--ssh-config', '--inventory',
-                '--ignore', '--config', 'no-capture', '-s', '--debug']
+        options = [
+            '--cluster', '--ssh-config', '--inventory',
+            '--ignore', '--config',
+        ]
         parser = Transport(
             argv, options=options,
             check_help=False,
             check_version=False
         )
         parser.parse_args()
-        #default_config_path = os.path.expanduser('~/.cephmedic')
         self.config_path = parser.get('--config', configuration.location())
-        #config_path = parser.get('--config')
 
         # load medic configuration
         loaded_config = configuration.load(path=parser.get('--config', self.config_path))
