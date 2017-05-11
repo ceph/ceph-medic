@@ -20,7 +20,6 @@ ceph-medic: A utility to run system checks on a Ceph cluster.
 Version: {version}
 
 Global Options:
-  --ignore              Comma-separated list of errors and warnings to ignore.
   --config              Path to a specific configuration file. Overrides the default:
                         $HOME/.cephdoctor.
   --cluster             Use a specific cluster name (defaults to 'ceph'). Alternatively,
@@ -89,7 +88,7 @@ Global Options:
     def main(self, argv):
         options = [
             '--cluster', '--ssh-config', '--inventory',
-            '--ignore', '--config',
+            '--config',
         ]
         parser = Transport(
             argv, options=options,
