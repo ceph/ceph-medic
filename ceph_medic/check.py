@@ -74,7 +74,7 @@ Configured Nodes:
         # If we are getting an explicit CLI flag to consume a monitor then go with that
         # regardless of what the config says.
         if cli_monitor or (configured_monitor and not hosts_file):
-            monitor = cli_monitor or configured_monitor:
+            monitor = cli_monitor or configured_monitor
             logger.info(
                 'will connect to monitor %s to gather information about nodes in the cluster' % monitor
             )
