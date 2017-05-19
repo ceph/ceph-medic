@@ -1,4 +1,5 @@
 from ceph_medic import metadata
+from ceph_medic.util import configuration
 
 
 #
@@ -11,8 +12,9 @@ def get_fsid(data):
     # https://github.com/ceph/ceph-deploy/blob/master/ceph_deploy/conf/ceph.py
     cluster_path = '/etc/ceph/%s.conf' % metadata['cluster_name']
     contents = data['paths']['/etc/ceph']['files'][cluster_path]['contents']
+    conf = configuration.load_string(contents)
     try:
-        fsid_line = [i for i in contents.split('\n') if 'fsid' in i][0].split('=')[-1].strip()
+        return conf.get_safe('global', 'fsid', '')
     except IndexError:
         return ''
     return fsid_line
