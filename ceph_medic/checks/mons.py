@@ -1,4 +1,5 @@
 from ceph_medic import metadata
+from ceph_medic.util import configuration
 
 #
 # Utilities
@@ -22,9 +23,10 @@ def get_secret(data):
     _path = data['paths']['/var/lib/ceph']['files']
     for _file in file_paths:
         if _file.startswith('/var/lib/ceph/mon/') and _file.endswith('keyring'):
-            contents = _path[_file]['contents'].split('\n')
+            contents = _path[_file]['contents'] #.split('\n')
+            conf = configuration.load_string(contents)
             try:
-                return [i for i in contents if 'key' in i][0].split(' ')[-1]
+                return conf.get_safe('mon.', 'key', '').split('\n')[0]
             except IndexError:
                 # is it really possible to get a keyring file that doesn't
                 # have a monitor secret?
