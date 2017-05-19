@@ -1,16 +1,12 @@
-from ceph_medic import check, generate, log
+from ceph_medic import check, log
 import sys
-import os
 from textwrap import dedent
 from tambo import Transport
 from execnet.gateway_bootstrap import HostNotFound
 import ceph_medic
 from ceph_medic.decorators import catches
-#from ceph_medic.loader import load_config
 from ceph_medic.util import configuration
 from ceph_medic import terminal
-
-log.setup()
 
 
 class Medic(object):
@@ -96,10 +92,14 @@ Global Options:
             check_version=False
         )
         parser.parse_args()
+
         self.config_path = parser.get('--config', configuration.location())
 
         # load medic configuration
         loaded_config = configuration.load(path=parser.get('--config', self.config_path))
+
+        # this is the earliest we can have enough config to setup logging
+        log.setup(loaded_config)
         # update the module-wide configuration object
         ceph_medic.config.update(configuration.get_overrides(loaded_config))
 
