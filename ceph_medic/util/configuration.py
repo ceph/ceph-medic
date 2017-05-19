@@ -2,6 +2,7 @@ try:
     import configparser
 except ImportError:
     import ConfigParser as configparser
+from StringIO import StringIO
 import logging
 import os
 from os import path
@@ -96,24 +97,21 @@ def parse_hosts(conf):
         parsed_hosts[section] = []
 
 
-class stripfile(file):
+def load_string(conf_as_string):
+    """
+    An easy way to get the INI configuration as a string, but return a Conf
+    object after writing it to a StringIO (file-like) object.
+    """
+    file_obj = StringIO()
+    file_obj.write(conf_as_string)
+    file_obj.seek(0)
+    return load(file_obj)
 
-    def readline(self):
-        line = super(stripfile, self).readline()
-        print line.__repr__()
-        raise RuntimeError()
-        return line.strip('\n')
-        #return super(stripfile, self).readline().strip().strip('\n').strip().lstrip()
-
-    def readlines(self):
-        lines = super(stripfile, self).readlines()
-        return [i.strip() for i in lines]
-        #return super(stripfile, self).readlines().strip().strip('\n').strip().lstrip()
 
 def load(path=None):
     parser = Conf()
     try:
-        if isinstance(path, file):
+        if isinstance(path, (file, StringIO)):
             parser.readfp(path)
         elif path and os.path.exists(path):
             parser.read(path)
@@ -170,7 +168,6 @@ def get_overrides(_conf=None):
                 conf_arguments[section_name][k] = v
 
     return conf_arguments
-
 
 
 class Conf(configparser.SafeConfigParser):
@@ -237,9 +234,10 @@ class AnsibleInventoryParser(object):
         atlanta
         florida
 
-    Will make this parser add ``osd0`` as part of ``osds`` so that ceph-medic understands
-    what the actual role of that node is. This extra bit of expanding and re-doing what Ansible could
-    do for us is done so that we aren't requiring all of Ansible just to be able to load a hosts file.
+    Will make this parser add ``osd0`` as part of ``osds`` so that ceph-medic
+    understands what the actual role of that node is. This extra bit of
+    expanding and re-doing what Ansible could do for us is done so that we
+    aren't requiring all of Ansible just to be able to load a hosts file.
 
     .. todo:: A try/except import for ``InventoryParser`` should be attempted
               so that we can just use Ansible if present, but fallback to this
@@ -357,7 +355,6 @@ class AnsibleInventoryParser(object):
                 # the nodes present for that one group
                 if self.hosts.get(group):
                     self.nodes[parent_group].extend(self.hosts.get(group))
-
 
     def _parse_host_definition(self, line):
         """
