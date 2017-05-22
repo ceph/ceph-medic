@@ -17,7 +17,6 @@ def get_fsid(data):
         return conf.get_safe('global', 'fsid', '')
     except IndexError:
         return ''
-    return fsid_line
 
 #
 # Error checks
