@@ -1,5 +1,5 @@
-import mon
-import osd
-import common
-import functions
-import commands
+import mon  # noqa
+import osd  # noqa
+import common  # noqa
+import functions  # noqa
+import commands  # noqa
