@@ -13,8 +13,6 @@ def get_connection(hostname, username=None, threads=5, use_sudo=None, detect_sud
     A very simple helper, meant to return a connection
     that will know about the need to use sudo.
     """
-    fallback = kw.get('fallback', [])
-    hosts = [hostname] + fallback
     if kw.get('logger') is False:  # explicitly disable remote logging
         remote_logger = None
     else:
@@ -58,28 +56,6 @@ def get_connection(hostname, username=None, threads=5, use_sudo=None, detect_sud
         logger.error(msg)
         logger.error(errors)
         raise error
-
-
-def initiate_connection(hosts, remote_logger, threads, detect_sudo):
-    """
-    Loop over a list of hosts, we do this so that fallbacks (e.g. [hostname,
-    IP]) are handled nicer, one after the other, while logging everything.
-    First one to go through wins the connection which is immediately returned
-    """
-    for host in hosts:
-        try:
-            logger.debug('attempting connection to host: %s', host)
-            return remoto.Connection(
-                host,
-                logger=remote_logger,
-                threads=threads,
-                detect_sudo=detect_sudo,
-            )
-        except HostNotFound as error:
-            logger.warning('connection failed with error: %s', str(error))
-        except Exception as error:
-            logger.exception('unhandled error when trying to connect')
-            raise
 
 
 def get_local_connection(logger, use_sudo=False):
