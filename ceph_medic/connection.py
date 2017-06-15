@@ -1,9 +1,7 @@
 import logging
 import socket
 import remoto
-from execnet.gateway_bootstrap import HostNotFound
 import ceph_medic
-from ceph_medic import terminal
 
 logger = logging.getLogger(__name__)
 
