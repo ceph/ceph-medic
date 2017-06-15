@@ -1,3 +1,6 @@
+import os
+import subprocess
+
 
 def which(executable):
     """find the location of an executable"""
@@ -14,6 +17,7 @@ def which(executable):
         executable_path = os.path.join(location, executable)
         if os.path.exists(executable_path):
             return executable_path
+
 
 def run(command):
     """
