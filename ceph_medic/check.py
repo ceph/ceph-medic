@@ -1,9 +1,12 @@
 import sys
 import ceph_medic
+import logging
 from ceph_medic.connection import get_connection
 from ceph_medic import runner, collector
 from ceph_medic.util import mon
 from tambo import Transport
+
+logger = logging.getLogger(__name__)
 
 
 class Check(object):
