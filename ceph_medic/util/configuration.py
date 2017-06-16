@@ -44,6 +44,24 @@ medic_conf_template = """
 """
 
 
+class _TrimIndentFile(object):
+    """
+    This is used to take a file-like object and removes any
+    leading tabs from each line when it's read. This is important
+    because some ceph configuration files include tabs which break
+    ConfigParser.
+    """
+    def __init__(self, fp):
+        self.fp = fp
+
+    def readline(self):
+        line = self.fp.readline()
+        return line.lstrip(' \t')
+
+    def __iter__(self):
+        return iter(self.readline, '')
+
+
 def location():
     """
     Find and return the location of the ceph-medic configuration file. If this
@@ -105,13 +123,13 @@ def load_string(conf_as_string):
     file_obj = StringIO()
     file_obj.write(conf_as_string)
     file_obj.seek(0)
-    return load(file_obj)
+    return load(_TrimIndentFile(file_obj))
 
 
 def load(path=None):
     parser = Conf()
     try:
-        if isinstance(path, (file, StringIO)):
+        if isinstance(path, (file, StringIO, _TrimIndentFile)):
             parser.readfp(path)
         elif path and os.path.exists(path):
             parser.read(path)
