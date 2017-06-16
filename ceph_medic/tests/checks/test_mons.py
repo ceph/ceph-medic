@@ -22,9 +22,9 @@ class TestGetSecret(object):
 
     def test_get_secret(self):
         contents = """
-    [mon.]
-        key = AQBvaBFZAAAAABAA9VHgwCg3rWn8fMaX8KL01A==
-            caps mon = "allow *"
+        [mon.]
+               key = AQBvaBFZAAAAABAA9VHgwCg3rWn8fMaX8KL01A==
+               caps mon = "allow *"
         """
         self.set_contents(contents)
         result = mons.get_secret(self.data)
@@ -36,8 +36,8 @@ class TestGetSecret(object):
 
     def test_get_no_secret_wrong_file(self):
         contents = """
-    [mon.]
-        caps mon = "allow *"
+        [mon.]
+               caps mon = "allow *"
         """
         self.set_contents(contents)
         result = mons.get_secret(self.data)
