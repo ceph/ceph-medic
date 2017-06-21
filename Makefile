@@ -57,7 +57,7 @@ spec:
 	  > ceph-medic.spec
 
 srpm: dist spec
-	fedpkg --dist epel7 srpm
+	fedpkg -v --dist epel7 srpm
 
 rpm: dist srpm
 	mock -r epel-7-x86_64 rebuild $(NVR).src.rpm \
