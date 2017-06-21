@@ -47,7 +47,6 @@ An admin tool to determine common issues on Ceph storage clusters.
 
 %install
 python setup.py install --prefix=%{_prefix} --root=%{buildroot}
-install -m 0755 -D scripts/ceph-medic $RPM_BUILD_ROOT/usr/bin
 
 %clean
 [ "$RPM_BUILD_ROOT" != "/" ] && rm -rf "$RPM_BUILD_ROOT"
