@@ -24,7 +24,6 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 BuildRequires:  python-devel
 BuildRequires:  python-setuptools
 BuildRequires:  python-virtualenv
-BuildRequires:  python-pytest
 BuildRequires:  python-tox
 BuildRequires:  pytest
 BuildRequires:  git
