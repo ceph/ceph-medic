@@ -122,6 +122,12 @@ def collect():
     failed_nodes = 0
     for node_type, nodes in cluster_nodes.items():
         for node in nodes:
+            # check if a node type exists for this node before doing any work:
+            try:
+                metadata[node_type]
+            except KeyError:
+                continue
+
             total_nodes += 1
             hostname = node['host']
             loader.write('Host: %-20s  connection: [%-20s]' % (hostname, terminal.yellow('connecting')))
