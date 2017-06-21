@@ -1,6 +1,8 @@
 #
 # spec file for package ceph-medic
 #
+%global commit @COMMIT@
+%global shortcommit %(c=%{commit}; echo ${c:0:7})
 
 %if ! (0%{?fedora} > 12 || 0%{?rhel} > 5)
 %{!?python_sitelib: %global python_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")}
@@ -11,12 +13,12 @@
 # common
 #################################################################################
 Name:           ceph-medic
-Version:        0.0.1
-Release:        0
+Version:        @VERSION@
+Release:        @RELEASE@%{?dist}
 Summary:        Find common issues on Ceph clusters
 License:        MIT
 Group:          System/Filesystems
-URL:            http://ceph.com/
+URL:            https://github.com/ceph/ceph-medic
 Source0:        %{name}-%{version}-%{shortcommit}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 BuildRequires:  python-devel
