@@ -277,7 +277,7 @@ class AnsibleInventoryParser(object):
         contents = []
 
         if filename:
-            with open(filename, 'rb') as fh:
+            with open(filename, 'r') as fh:
                 for line in fh.readlines():
                     if line.startswith(u';'):
                         continue
