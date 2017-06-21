@@ -17,7 +17,7 @@ Summary:        Find common issues on Ceph clusters
 License:        MIT
 Group:          System/Filesystems
 URL:            http://ceph.com/
-Source0:        %{name}-%{version}.tar.bz2
+Source0:        %{name}-%{version}-%{shortcommit}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 BuildRequires:  python-devel
 BuildRequires:  python-setuptools
