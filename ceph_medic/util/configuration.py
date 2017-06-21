@@ -2,7 +2,10 @@ try:
     import configparser
 except ImportError:
     import ConfigParser as configparser
-from StringIO import StringIO
+try:
+    from StringIO import StringIO
+except ImportError:
+    from io import StringIO
 import logging
 import os
 from os import path
