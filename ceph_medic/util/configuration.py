@@ -126,17 +126,17 @@ def load_string(conf_as_string):
     file_obj = StringIO()
     file_obj.write(conf_as_string)
     file_obj.seek(0)
-    return load(_TrimIndentFile(file_obj))
+    return load(file=_TrimIndentFile(file_obj))
 
 
-def load(path=None):
+def load(path=None, file=None):
     parser = Conf()
     try:
-        if isinstance(path, (file, StringIO, _TrimIndentFile)):
-            parser.readfp(path)
+        if file:
+            parser.readfp(file)
         elif path and os.path.exists(path):
             parser.read(path)
-        elif path is None:
+        else:
             parser.read(location())
         return parser
     except configparser.ParsingError as error:
