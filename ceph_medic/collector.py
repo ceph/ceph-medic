@@ -126,6 +126,8 @@ def collect():
             try:
                 metadata[node_type]
             except KeyError:
+                msg = "Skipping node {} from unknown host group: {}".format(node, node_type)
+                logger.warning(msg)
                 continue
 
             total_nodes += 1
