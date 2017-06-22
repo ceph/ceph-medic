@@ -2,7 +2,10 @@ try:
     import configparser
 except ImportError:
     import ConfigParser as configparser
-from StringIO import StringIO
+try:
+    from StringIO import StringIO
+except ImportError:
+    from io import StringIO
 import logging
 import os
 from os import path
@@ -123,17 +126,17 @@ def load_string(conf_as_string):
     file_obj = StringIO()
     file_obj.write(conf_as_string)
     file_obj.seek(0)
-    return load(_TrimIndentFile(file_obj))
+    return load(file=_TrimIndentFile(file_obj))
 
 
-def load(path=None):
+def load(path=None, file=None):
     parser = Conf()
     try:
-        if isinstance(path, (file, StringIO, _TrimIndentFile)):
-            parser.readfp(path)
+        if file:
+            parser.readfp(file)
         elif path and os.path.exists(path):
             parser.read(path)
-        elif path is None:
+        else:
             parser.read(location())
         return parser
     except configparser.ParsingError as error:
@@ -274,7 +277,7 @@ class AnsibleInventoryParser(object):
         contents = []
 
         if filename:
-            with open(filename, 'rb') as fh:
+            with open(filename, 'r') as fh:
                 for line in fh.readlines():
                     if line.startswith(u';'):
                         continue
