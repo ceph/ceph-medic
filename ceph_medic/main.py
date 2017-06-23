@@ -17,7 +17,7 @@ Version: {version}
 
 Global Options:
   --config              Path to a specific configuration file. Overrides the default:
-                        $HOME/.cephdoctor.
+                        $HOME/.cephmedic.conf.
   --cluster             Use a specific cluster name (defaults to 'ceph'). Alternatively,
                         this is infered from a conf file name in /etc/ceph/
   --ssh-config          Specify an alternate configuration for SSH
