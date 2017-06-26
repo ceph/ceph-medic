@@ -1,3 +1,5 @@
+import py.test
+
 from ceph_medic import collector
 from mock import Mock
 
@@ -60,3 +62,18 @@ class TestCollectPathMetadata(object):
         conn = get_mock_connection()
         result = collector.get_path_metadata(conn, "/some/path")
         assert "/some/path" in result["dirs"]
+
+
+class TestCollectPaths(object):
+
+    @py.test.mark.parametrize(
+        'path',
+        ['/etc/ceph', '/var/lib/ceph', '/var/run/ceph'],
+    )
+    def test_includes_paths(self, path, monkeypatch):
+        def mock_metadata(conn, p, **kw):
+            return dict()
+        monkeypatch.setattr(collector, 'get_path_metadata', mock_metadata)
+        result = collector.collect_paths(Mock())
+        assert path in result
+
