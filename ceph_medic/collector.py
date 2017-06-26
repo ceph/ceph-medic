@@ -112,6 +112,37 @@ def get_path_metadata(conn, path, **kw):
     return {'dirs': dirs, 'files': files}
 
 
+def get_node_metadata(conn, hostname, cluster_nodes):
+    # "import" the remote functions so that remote calls using the
+    # functions can be executed
+    conn.import_module(remote.functions)
+
+    node_metadata = {'ceph': {}}
+
+    # collect paths and files first
+    loader.write('Host: %-*s  collecting: [%s]' % (20, hostname, terminal.yellow('paths')))
+    node_metadata['paths'] = collect_paths(conn)
+    loader.write('Host: %-*s  collecting: [%s]' % (20, hostname, terminal.green('paths')))
+
+    # TODO: collect network information, passing all the cluster_nodes
+    # so that it can check for inter-node connectivity
+    loader.write('Host: %-*s  collecting: [%s]' % (20, hostname, terminal.yellow('network')))
+    node_metadata['network'] = collect_network(cluster_nodes)
+    loader.write('Host: %-*s  collecting: [%s]' % (20, hostname, terminal.green('network')))
+
+    # TODO: collect device information
+    loader.write('Host: %-*s  collecting: [%s]' % (20, hostname, terminal.yellow('devices')))
+    node_metadata['devices'] = collect_devices()
+    loader.write('Host: %-*s  collecting: [%s]' % (20, hostname, terminal.green('devices')))
+
+    # collect ceph information
+    loader.write('Host: %-*s  collecting: [%s]' % (20, hostname, terminal.yellow('ceph information')))
+    node_metadata['ceph'] = collect_ceph_info(conn)
+    loader.write('Host: %-*s  collecting: [%s]' % (20, hostname, terminal.green('ceph information')))
+
+    return node_metadata
+
+
 def collect():
     """
     The main collecting entrypoint. This function will call all the pieces
@@ -153,36 +184,9 @@ def collect():
                 failed_nodes += 1
                 continue
 
-            # "import" the remote functions so that remote calls using the
-            # functions can be executed
-            conn.import_module(remote.functions)
-
-            node_metadata = {'ceph': {}}
-
-            # collect paths and files first
-            loader.write('Host: %-*s  collecting: [%s]' % (20, hostname, terminal.yellow('paths')))
-            node_metadata['paths'] = collect_paths(conn)
-            loader.write('Host: %-*s  collecting: [%s]' % (20, hostname, terminal.green('paths')))
-
-            # TODO: collect network information, passing all the cluster_nodes
-            # so that it can check for inter-node connectivity
-            loader.write('Host: %-*s  collecting: [%s]' % (20, hostname, terminal.yellow('network')))
-            node_metadata['network'] = collect_network(cluster_nodes)
-            loader.write('Host: %-*s  collecting: [%s]' % (20, hostname, terminal.green('network')))
-
-            # TODO: collect device information
-            loader.write('Host: %-*s  collecting: [%s]' % (20, hostname, terminal.yellow('devices')))
-            node_metadata['devices'] = collect_devices()
-            loader.write('Host: %-*s  collecting: [%s]' % (20, hostname, terminal.green('devices')))
-
-            # collect ceph information
-            loader.write('Host: %-*s  collecting: [%s]' % (20, hostname, terminal.yellow('ceph information')))
-            node_metadata['ceph'] = collect_ceph_info(conn)
-            loader.write('Host: %-*s  collecting: [%s]' % (20, hostname, terminal.green('ceph_information')))
-
             # send the full node metadata for global scope so that the checks
             # can consume this
-            metadata[node_type][node['host']] = node_metadata
+            metadata[node_type][node['host']] = get_node_metadata(conn, hostname, cluster_nodes)
             conn.exit()
     if failed_nodes == total_nodes:
         loader.write(terminal.red('Collection failed!') + ' ' *70 + '\n')
