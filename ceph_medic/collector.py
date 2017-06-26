@@ -83,28 +83,33 @@ def collect_paths(conn):
         "/var/run/ceph": {'get_contents': False},
     }
     for p, kw in paths.items():
-        # generate the tree
-        tree = conn.remote_module.path_tree(
-            p,
-            kw.get('skip_dirs'),
-            kw.get('skip_files'),
-            kw.get('get_contents')
-        )
-
-        files = {}
-        dirs = {}
-
-        for i in tree['files']:
-            files[i] = conn.remote_module.stat_path(i, None, None, kw.get('get_contents'))
-        for i in tree['dirs']:
-            dirs[i] = conn.remote_module.stat_path(i, None, None, False)
-
-            # actual root path
-            dirs[p] = conn.remote_module.stat_path(i, None, None, False)
-
-        # Now slap the files and dirs back to the path_metadata for the current node
-        path_metadata[p] = {'dirs': dirs, 'files': files}
+        # Collect metadata about the files and dirs for the given path and assign
+        # it back to the path_metadata for the current node
+        path_metadata[p] = get_path_metadata(conn, p, **kw)
     return path_metadata
+
+
+def get_path_metadata(conn, path, **kw):
+    # generate the tree
+    tree = conn.remote_module.path_tree(
+        path,
+        kw.get('skip_dirs'),
+        kw.get('skip_files'),
+        kw.get('get_contents')
+    )
+
+    files = {}
+    dirs = {}
+
+    for i in tree['files']:
+        files[i] = conn.remote_module.stat_path(i, None, None, kw.get('get_contents'))
+    for i in tree['dirs']:
+        dirs[i] = conn.remote_module.stat_path(i, None, None, False)
+
+    # actual root path
+    dirs[path] = conn.remote_module.stat_path(i, None, None, False)
+
+    return {'dirs': dirs, 'files': files}
 
 
 def collect():
