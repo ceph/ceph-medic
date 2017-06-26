@@ -173,13 +173,13 @@ def collect():
             # TODO: collect device information
             loader.write('Host: %-*s  collecting: [%s]' % (20, hostname, terminal.yellow('devices')))
             node_metadata['devices'] = collect_devices()
-            loader.write('Host: %-*s  collecting: [%s]' % (20, hostname, terminal.green('paths')))
+            loader.write('Host: %-*s  collecting: [%s]' % (20, hostname, terminal.green('devices')))
 
             # collect ceph information
-            node_metadata['ceph']['version'] = remote.commands.ceph_version(conn)
-            loader.write('Host: %-*s  collecting: [%s]' % (20, hostname, terminal.green('paths')))
-            node_metadata['ceph']['installed'] = remote.commands.ceph_is_installed(conn)
-            loader.write('Host: %-*s  collecting: [%s]' % (20, hostname, terminal.green('paths')))
+            loader.write('Host: %-*s  collecting: [%s]' % (20, hostname, terminal.yellow('ceph information')))
+            node_metadata['ceph'] = collect_ceph_info(conn)
+            loader.write('Host: %-*s  collecting: [%s]' % (20, hostname, terminal.green('ceph_information')))
+
             # send the full node metadata for global scope so that the checks
             # can consume this
             metadata[node_type][node['host']] = node_metadata
@@ -212,8 +212,8 @@ def collect_devices():
 
 # Ceph
 #
-# XXX there are lots of pieces to collect about ceph, like repository
-# information, where did the ceph package came from, versions, etc... we can't
-# pile everything on one function
-def collect_ceph():
-    pass
+def collect_ceph_info(conn):
+    result = dict()
+    result['version'] = remote.commands.ceph_version(conn)
+    result['installed'] = remote.commands.ceph_is_installed(conn)
+    return result
