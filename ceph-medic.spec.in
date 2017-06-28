@@ -4,9 +4,6 @@
 %global commit @COMMIT@
 %global shortcommit %(c=%{commit}; echo ${c:0:7})
 
-#################################################################################
-# common
-#################################################################################
 Name:           ceph-medic
 Version:        @VERSION@
 Release:        @RELEASE@%{?dist}
@@ -23,9 +20,6 @@ Requires:       python-execnet
 
 BuildArch:      noarch
 
-#################################################################################
-# specific
-#################################################################################
 
 %description
 An admin tool to determine common issues on Ceph storage clusters.
