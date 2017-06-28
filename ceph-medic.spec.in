@@ -12,7 +12,6 @@ Version:        @VERSION@
 Release:        @RELEASE@%{?dist}
 Summary:        Find common issues on Ceph clusters
 License:        MIT
-Group:          System/Filesystems
 URL:            https://github.com/ceph/ceph-medic
 Source0:        %{name}-%{version}-%{shortcommit}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
