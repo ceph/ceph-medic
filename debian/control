@@ -18,4 +18,4 @@ Package: ceph-medic
 Architecture: all
 Depends: ${misc:Depends}, ${python:Depends}
 Description: ceph-medic is a tool to determine common issues on Ceph storage
-clusters.
+ clusters.
