@@ -5,7 +5,7 @@ Section: admin
 Priority: optional
 Build-Depends: debhelper (>= 7), python-setuptools, git
 X-Python-Version: >= 2.7
-Standards-Version: 3.9.2
+Standards-Version: 3.9.7
 Homepage: http://ceph.com/
 Vcs-Git: git://github.com/ceph/ceph-medic.git
 Vcs-Browser: https://github.com/ceph/ceph-medic
