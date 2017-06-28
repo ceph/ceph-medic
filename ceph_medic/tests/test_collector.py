@@ -29,16 +29,20 @@ class FakeConnRemoteModule(object):
 
 
 def get_tree(files=None, dirs=None):
+    if files is None:
+        files = ["file1.txt"]
+    if dirs is None:
+        dirs = ["dir1"]
     tree = dict(
-        files=files or ["dir1"],
-        dirs=dirs or ["file1.text"],
+        files=files,
+        dirs=dirs,
     )
     return tree
 
 
-def get_mock_connection(data=None):
+def get_mock_connection(data=None, files=None, dirs=None):
     conn = Mock()
-    tree = get_tree()
+    tree = get_tree(files=files, dirs=dirs)
     default_data = dict(
         path_tree=tree
     )
@@ -61,6 +65,11 @@ class TestCollectPathMetadata(object):
 
     def test_metadata_includes_root_path(self):
         conn = get_mock_connection()
+        result = collector.get_path_metadata(conn, "/some/path")
+        assert "/some/path" in result["dirs"]
+
+    def test_collects_root_path_when_no_files_or_dirs(self):
+        conn = get_mock_connection(files=[], dirs=[])
         result = collector.get_path_metadata(conn, "/some/path")
         assert "/some/path" in result["dirs"]
 
