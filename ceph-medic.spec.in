@@ -39,7 +39,8 @@ An admin tool to determine common issues on Ceph storage clusters.
 python setup.py install --prefix=%{_prefix} --root=%{buildroot}
 
 %files
-%doc LICENSE README.rst
+%license LICENSE
+%doc README.rst
 %{_bindir}/ceph-medic
 %{python_sitelib}/*
 
