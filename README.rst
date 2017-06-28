@@ -7,4 +7,4 @@ common issues that might prevent correct functionality. It requires
 non-interactive SSH access to accounts that can ``sudo`` without a password
 prompt.
 
-
+Full usage documentation can be found at: http://docs.ceph.com/ceph-medic
