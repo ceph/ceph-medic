@@ -30,6 +30,19 @@ class TestFlatInventory(object):
         assert len(result['mons']) == 1
         assert len(result['osds']) == 1
 
+    def test_ignores_unknown_groups(self, tmpdir):
+        filename = os.path.join(str(tmpdir), 'hosts')
+        contents = """
+        [mons]
+        mon0
+
+        [test]
+        node1
+        """
+        make_hosts_file(filename, contents)
+        result = configuration.AnsibleInventoryParser(filename).nodes
+        assert 'test' not in result
+
 
 class TestNestedInventory(object):
 
@@ -57,7 +70,7 @@ class TestNestedInventory(object):
         """
         make_hosts_file(filename, contents)
         result = configuration.AnsibleInventoryParser(filename).nodes
-        assert result['atlanta'][0]['host'] == 'mon0'
+        assert result['mons'][0]['host'] == 'mon0'
 
     def test_nested_levels_populates(self, tmpdir):
         filename = os.path.join(str(tmpdir), 'hosts')
