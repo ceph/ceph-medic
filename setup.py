@@ -26,7 +26,6 @@ setup(
 
     install_requires=[
         'execnet',
-        'setuptools',
         'tambo',
         'remoto',
     ] + install_requires,
