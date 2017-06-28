@@ -14,7 +14,6 @@ Summary:        Find common issues on Ceph clusters
 License:        MIT
 URL:            https://github.com/ceph/ceph-medic
 Source0:        %{name}-%{version}-%{shortcommit}.tar.gz
-BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 BuildRequires:  python-devel
 BuildRequires:  python-setuptools
 BuildRequires:  python-virtualenv
