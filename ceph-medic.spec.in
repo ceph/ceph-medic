@@ -28,9 +28,10 @@ An admin tool to determine common issues on Ceph storage clusters.
 %autosetup -p1
 
 %build
+python setup.py build
 
 %install
-python setup.py install --prefix=%{_prefix} --root=%{buildroot}
+python setup.py install -O1 --skip-build --root %{buildroot}
 
 %files
 %license LICENSE
