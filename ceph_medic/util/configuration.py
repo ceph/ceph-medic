@@ -10,7 +10,7 @@ import logging
 import os
 from os import path
 import re
-from ceph_medic import terminal
+from ceph_medic import terminal, metadata
 
 logger = logging.getLogger(__name__)
 
@@ -335,6 +335,19 @@ class AnsibleInventoryParser(object):
                 else:
                     self.hosts[host_group].append(host_item)
         self.expand_nodes()
+        self.filter_groups()
+
+    def filter_groups(self):
+        """
+        Removes any groups from self.nodes that do not exist in
+        ceph_medic.metadata. We want to do this because we don't care
+        about nodes or groups in an inventory that are not part of
+        the ceph cluster.
+        """
+        groups = [key for key in self.nodes.keys()]
+        for group in groups:
+            if group not in metadata:
+                del self.nodes[group]
 
     def expand_nested_group(self, parent_group, group):
         """
