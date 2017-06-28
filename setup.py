@@ -25,6 +25,7 @@ setup(
     zip_safe = False,
 
     install_requires=[
+        'execnet',
         'setuptools',
         'tambo',
         'remoto',
