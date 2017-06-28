@@ -107,7 +107,7 @@ def get_path_metadata(conn, path, **kw):
         dirs[i] = conn.remote_module.stat_path(i, None, None, False)
 
     # actual root path
-    dirs[path] = conn.remote_module.stat_path(i, None, None, False)
+    dirs[path] = conn.remote_module.stat_path(path, None, None, False)
 
     return {'dirs': dirs, 'files': files}
 
