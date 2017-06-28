@@ -31,7 +31,7 @@ BuildArch:      noarch
 An admin tool to determine common issues on Ceph storage clusters.
 
 %prep
-%setup -q
+%autosetup -p1
 
 %build
 
