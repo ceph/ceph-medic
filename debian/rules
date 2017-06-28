@@ -7,6 +7,3 @@ export PYBUILD_NAME=ceph-medic
 
 %:
 	dh $@ --buildsystem pybuild --with python2
-
-override_dh_clean:
-	dh_clean
