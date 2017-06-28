@@ -7,7 +7,6 @@
 ceph-medic -- Find common issues in Ceph clusters
 =================================================
 
-
 ``ceph-medic`` is a very simple tool to run against a Ceph cluster to detect
 common issues that might prevent correct functionality. It requires
 non-interactive SSH access to accounts that can ``sudo`` without a password
@@ -55,7 +54,7 @@ Browse https://shaman.ceph.com/repos/ceph-medic to find the available repos.
    Shaman repos are only available for 2 weeks before they are automatically deleted.
    However, there should always be a repo available for the master branch of ``ceph-medic``.
 
-``ceph-medic`` has dependancies on packages found in EPEL, so EPEL will need to be enabled.
+``ceph-medic`` has dependencies on packages found in EPEL, so EPEL will need to be enabled.
 There is also a dependancy on ``python-tambo`` which is not available in EPEL.
 
 Follow these steps to install a centos 7 repo from shaman.ceph.com:
@@ -153,7 +152,7 @@ Logging
 -------
 
 By default ``ceph-medic`` sends complete logs to the current working directory. This log file is more
-verbose than the output you see on the terminal. To change where these logs are created modify the defaul
+verbose than the output you see on the terminal. To change where these logs are created modify the default
 value for ``--log-path`` in ``~/.cephmedic.conf``.
 
 Running checks
