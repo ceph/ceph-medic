@@ -3,7 +3,11 @@ Maintainer: Alfredo Deza <adeza@redhat.com>
 Uploaders: Alfredo Deza <adeza@redhat.com>
 Section: admin
 Priority: optional
-Build-Depends: debhelper (>= 7), python-setuptools, git
+Build-Depends:
+ debhelper (>= 7),
+ dh-python,
+ python2.7,
+ python-setuptools
 X-Python-Version: >= 2.7
 Standards-Version: 3.9.7
 Homepage: http://ceph.com/
