@@ -38,9 +38,6 @@ An admin tool to determine common issues on Ceph storage clusters.
 %install
 python setup.py install --prefix=%{_prefix} --root=%{buildroot}
 
-%clean
-[ "$RPM_BUILD_ROOT" != "/" ] && rm -rf "$RPM_BUILD_ROOT"
-
 %files
 %defattr(-,root,root)
 %doc LICENSE README.rst
