@@ -14,6 +14,8 @@ Source0:        %{name}-%{version}-%{shortcommit}.tar.gz
 BuildRequires:  python-devel
 BuildRequires:  python-setuptools
 BuildRequires:  pytest
+BuildRequires:  python-remoto
+BuildRequires:  python-mock
 Requires:       python-remoto
 Requires:       python-tambo
 Requires:       python-execnet
@@ -32,6 +34,11 @@ python setup.py build
 
 %install
 python setup.py install -O1 --skip-build --root %{buildroot}
+
+%check
+export PYTHONPATH=$(pwd)
+
+py.test-%{python_version} -v ceph_medic/tests
 
 %files
 %license LICENSE
