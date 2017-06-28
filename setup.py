@@ -33,6 +33,7 @@ setup(
     tests_require=[
         'pytest >=2.1.3',
         'tox',
+        'mock',
     ],
 
     scripts = ['bin/ceph-medic'],
