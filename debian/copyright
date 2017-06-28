@@ -1,3 +1,7 @@
+Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0
+Upstream-Name: ceph-medic
+Source: https://github.com/ceph/ceph-medic
+
 Files: *
 Copyright: (c) 2016 by Red Hat Inc. <contact@redhat.com>
 License: MIT (see /usr/share/common-licenses/MIT)
