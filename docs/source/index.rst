@@ -17,31 +17,6 @@ Installation
 
 ``ceph-medic`` supports a couple different installation methods:
 
-github
-------
-You can install directly from the source on github by following these steps:
-
-- Clone the repository::
-
-      git clone https://github.com/ceph/ceph-medic.git
-
-
-- Change to the ``ceph-medic`` directory::
-
-      cd ceph-medic
-
-- Create and activate a python virtual environment::
-
-      virtualenv venv
-      source venv/bin/activate
-
-- Install ceph-medic into the virtual environment::
-
-      python setup.py install
-
-``ceph-medic`` should now be installed and available in the virtualenv you just created.
-Check your installation by running: ``ceph-medic --help``
-
 shaman repos
 ------------
 
@@ -79,6 +54,31 @@ Follow these steps to install a centos 7 repo from shaman.ceph.com:
 - Verify your install::
 
       ceph-medic --help
+
+github
+------
+You can install directly from the source on github by following these steps:
+
+- Clone the repository::
+
+      git clone https://github.com/ceph/ceph-medic.git
+
+
+- Change to the ``ceph-medic`` directory::
+
+      cd ceph-medic
+
+- Create and activate a python virtual environment::
+
+      virtualenv venv
+      source venv/bin/activate
+
+- Install ceph-medic into the virtual environment::
+
+      python setup.py install
+
+``ceph-medic`` should now be installed and available in the virtualenv you just created.
+Check your installation by running: ``ceph-medic --help``
 
 
 Usage
