@@ -3,6 +3,7 @@ import grp
 import pwd
 import traceback
 import sys
+import subprocess
 
 
 # Utilities
@@ -87,6 +88,37 @@ def path_tree(path, skip_dirs=None, skip_files=None, get_contents=None):
             dirs.append(absolute_path)
 
     return dict(path=path, dirs=dirs, files=files)
+
+
+def which(executable):
+    """find the location of an executable"""
+    locations = (
+        '/usr/local/bin',
+        '/bin',
+        '/usr/bin',
+        '/usr/local/sbin',
+        '/usr/sbin',
+        '/sbin',
+    )
+
+    for location in locations:
+        executable_path = os.path.join(location, executable)
+        if os.path.exists(executable_path):
+            return executable_path
+
+
+def run(command):
+    """
+    run a command, return stdout, stderr, and exit code.
+    """
+    process = subprocess.Popen(
+        command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, close_fds=True
+    )
+    stdout = process.stdout.read().splitlines()
+    stderr = process.stderr.read().splitlines()
+    returncode = process.wait()
+
+    return stdout, stderr, returncode
 
 
 # remoto magic, needed to execute these functions remotely
