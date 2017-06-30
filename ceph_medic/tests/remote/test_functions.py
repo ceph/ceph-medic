@@ -9,6 +9,15 @@ def make_test_file(filename, contents=None):
         f.write(contents)
 
 
+def make_test_tree(path, contents=None, tree=None):
+    file1 = os.path.join(path, "file1.txt")
+    dir1 = os.path.join(path, "dir1")
+    file2 = os.path.join(path, "dir1/file2.txt")
+    make_test_file(file1)
+    os.mkdir(dir1)
+    make_test_file(file2)
+
+
 class TestStatPath(object):
 
     def test_stat_file_includes_owner(self, tmpdir):
@@ -42,3 +51,38 @@ class TestStatPath(object):
     def test_stat_dir(self, tmpdir):
         result = functions.stat_path(str(tmpdir))
         assert result
+
+
+class TestPathTree(object):
+
+    def test_skip_dirs(self, tmpdir):
+        path = str(tmpdir)
+        make_test_tree(path)
+        result = functions.path_tree(path, skip_dirs=['dir1'])
+        assert "dir1" not in result["dirs"]
+
+    def test_skip_files(self, tmpdir):
+        path = str(tmpdir)
+        make_test_tree(path)
+        result = functions.path_tree(path, skip_files=['file1.txt'])
+        assert "file1.txt" not in result["files"]
+
+    def test_includes_path(self, tmpdir):
+        path = str(tmpdir)
+        make_test_tree(path)
+        result = functions.path_tree(path)
+        assert result["path"] == path
+
+    def test_includes_files(self, tmpdir):
+        path = str(tmpdir)
+        make_test_tree(path)
+        result = functions.path_tree(path)
+        assert "files" in result
+        assert os.path.join(path, "file1.txt") in result["files"]
+
+    def test_includes_dirs(self, tmpdir):
+        path = str(tmpdir)
+        make_test_tree(path)
+        result = functions.path_tree(path)
+        assert "dirs" in result
+        assert os.path.join(path, "dir1") in result["dirs"]
