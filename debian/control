@@ -17,4 +17,8 @@ Vcs-Browser: https://github.com/ceph/ceph-medic
 Package: ceph-medic
 Architecture: all
 Depends: ${misc:Depends}, ${python:Depends}
-Description: determine common issues on Ceph storage clusters.
+Description: determine common issues on Ceph storage clusters
+ ceph-medic is a very simple tool to run against a Ceph cluster to detect
+ common issues that might prevent correct functionality. It requires
+ non-interactive SSH access to accounts that can sudo without a password
+ prompt.
