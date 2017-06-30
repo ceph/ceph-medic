@@ -6,7 +6,7 @@ Priority: optional
 Build-Depends:
  debhelper (>= 7),
  dh-python,
- python2.7,
+ python,
  python-setuptools
 X-Python-Version: >= 2.7
 Standards-Version: 3.9.7
