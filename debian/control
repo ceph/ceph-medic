@@ -1,6 +1,5 @@
 Source: ceph-medic
 Maintainer: Alfredo Deza <adeza@redhat.com>
-Uploaders: Alfredo Deza <adeza@redhat.com>
 Section: admin
 Priority: optional
 Build-Depends:
