@@ -1,22 +1,24 @@
 Source: ceph-medic
 Maintainer: Alfredo Deza <adeza@redhat.com>
-Uploaders: Alfredo Deza <adeza@redhat.com>
 Section: admin
 Priority: optional
-Build-Depends: debhelper (>= 7), python-setuptools, git
+Build-Depends:
+ debhelper (>= 7),
+ dh-python,
+ python,
+ python-pytest,
+ python-setuptools
 X-Python-Version: >= 2.7
-Standards-Version: 3.9.2
+Standards-Version: 3.9.7
 Homepage: http://ceph.com/
 Vcs-Git: git://github.com/ceph/ceph-medic.git
 Vcs-Browser: https://github.com/ceph/ceph-medic
 
 Package: ceph-medic
 Architecture: all
-Depends: python,
-         python-setuptools,
-         python-remoto,
-         python-tambo,
-         ${misc:Depends},
-         ${python:Depends}
-Description: ceph-medic is a tool to determine common issues on Ceph storage
-clusters.
+Depends: ${misc:Depends}, ${python:Depends}
+Description: determine common issues on Ceph storage clusters
+ ceph-medic is a very simple tool to run against a Ceph cluster to detect
+ common issues that might prevent correct functionality. It requires
+ non-interactive SSH access to accounts that can sudo without a password
+ prompt.
