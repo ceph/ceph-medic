@@ -5,4 +5,5 @@ ceph-medic contents
    :maxdepth: 2
 
    index.rst
+   codes.rst
    facts.rst
