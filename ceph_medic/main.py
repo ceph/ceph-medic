@@ -19,7 +19,7 @@ Global Options:
   --config              Path to a specific configuration file. Overrides the default:
                         $HOME/.cephmedic.conf.
   --cluster             Use a specific cluster name (defaults to 'ceph'). Alternatively,
-                        this is infered from a conf file name in /etc/ceph/
+                        this is inferred from a conf file name in /etc/ceph/
   --ssh-config          Specify an alternate configuration for SSH
   --version, version    Shows the current installed version
   --inventory           Prefer a ceph-ansible inventory (hosts) file instead of default
