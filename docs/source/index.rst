@@ -17,6 +17,43 @@ Installation
 
 ``ceph-medic`` supports a couple different installation methods:
 
+official upstream repos
+-----------------------
+
+Download official releases of ``ceph-medic`` at https://www.download.ceph.com/ceph-medic
+
+Currently, only rpm repos built for centos 7 are supported.
+
+``ceph-medic`` has dependencies on packages found in EPEL, so EPEL will need to be enabled.
+There is also a dependancy on ``python-tambo`` which is `still in epel-testing <https://bodhi.fedoraproject.org/updates/FEDORA-EPEL-2017-76ab6036a0>`_.
+
+Follow these steps to install a centos 7 repo from download.ceph.com:
+
+- Install the latest rpm repo from download.ceph.com::
+
+      wget http://download.ceph.com/ceph-medic/latest/rpm/el7/ceph-medic.repo -O /etc/yum.repos.d/ceph-medic.repo
+
+- Install ``epel-release``::
+
+      yum install epel-release
+
+- Install tambo from epel-testing::
+
+      yum --enablerepo=epel-testing install python-tambo
+
+- Install the gpg key for ``ceph-medic``::
+
+      wget https://download.ceph.com/keys/release.asc
+      rpm --import release.asc
+
+- Install ``ceph-medic``::
+
+      yum install ceph-medic
+
+- Verify your install::
+
+      ceph-medic --help
+
 shaman repos
 ------------
 
