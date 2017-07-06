@@ -8,4 +8,4 @@ metadata = {'rgws': {}, 'mgrs': {}, 'mdss':{}, 'clients': {}, 'osds':{}, 'mons':
 
 daemon_types = [i for i in metadata.keys() if i != 'nodes']
 
-__version__ = '0.0.1'
+__version__ = '1.0.0'
