@@ -1,0 +1,12 @@
+---
+
+- hosts: medic
+  become: no
+  tasks:
+
+    - name: copy hosts file to vagrant home dir
+      command: cp /vagrant/hosts /home/vagrant
+      become: yes
+
+    - name: use ceph-medic to check ceph cluster
+      command: ceph-medic --inventory /home/vagrant/hosts check
