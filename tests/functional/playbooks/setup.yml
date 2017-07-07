@@ -1,0 +1,63 @@
+---
+- hosts: all
+  gather_facts: True
+  tasks:
+    - name: write all nodes to /etc/hosts
+      sudo: yes
+      blockinfile:
+        dest: /etc/hosts
+        block: |
+          {{ hostvars[item]["address"] }} {{ item }}
+        marker: "# {mark} ANSIBLE MANAGED BLOCK {{ item }}"
+      with_inventory_hostnames: all
+
+- hosts: medic
+  become: yes
+  tasks:
+
+    - name: fetch shaman ceph-medic repo
+      get_url:
+        url: https://shaman.ceph.com/api/repos/ceph-medic/{{ ceph_medic_branch }}/latest/centos/7/repo
+        dest: /etc/yum.repos.d/ceph-medic.repo
+
+    - name: print contents of /etc/yum.repos.d/ceph-medic.repo
+      command: cat /etc/yum.repos.d/ceph-medic.repo
+
+    - name: install epel-release
+      yum:
+        name: epel-release
+        state: present
+
+    - name: install python-tambo
+      yum:
+        name: python-tambo
+        state: present
+        enablerepo: epel-testing
+
+    - name: install ceph-medic
+      yum:
+        name: ceph-medic
+        state: present
+
+    - name: test ceph-medic install
+      become: no
+      command: ceph-medic --help
+
+    - name: copy vagrant insecure private ssh key
+      copy:
+        src: ~/.vagrant.d/insecure_private_key
+        dest: /home/vagrant/.ssh/id_dsa
+        mode: 0600
+        owner: vagrant
+        group: vagrant
+
+    - name: turn off StrictHostKeyChecking
+      blockinfile:
+        dest: /home/vagrant/.ssh/config
+        create: yes
+        mode: 0400
+        owner: vagrant
+        group: vagrant
+        block: |
+          Host *
+              StrictHostKeyChecking no
