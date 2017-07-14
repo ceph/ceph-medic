@@ -3,6 +3,17 @@ from ceph_medic import terminal
 from functools import wraps
 
 
+def precheck():
+    """
+    Use this decorator on check methods to indicate that they can/should be run
+    before ceph has been installed and configured on a cluster.
+    """
+    def decorate(f):
+        f._precheck = True
+        return f
+    return decorate
+
+
 def catches(catch=None, handler=None, exit=True):
     """
     Very simple decorator that tries any of the exception(s) passed in as
