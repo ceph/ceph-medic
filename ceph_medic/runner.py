@@ -7,13 +7,14 @@ logger = logging.getLogger(__name__)
 
 class Runner(object):
 
-    def __init__(self):
+    def __init__(self, only_prechecks=False):
         self.passed = 0
         self.skipped = 0
         self.failed = 0
         self.total = 0
         self.ignore = []
         self.errors = []
+        self.only_prechecks = only_prechecks
         self.total_hosts = len(metadata['nodes'].keys())
 
     def run(self):
@@ -39,7 +40,7 @@ class Runner(object):
         terminal.loader.write(' %s' % terminal.yellow(host))
         has_error = False
         for module in modules:
-            checks = collect_checks(module)
+            checks = collect_checks(module, only_prechecks=self.only_prechecks)
             for check in checks:
                 try:
                     # TODO: figure out how to skip running a specific check if
@@ -139,6 +140,8 @@ def nodes_header(daemon_type):
         daemon=readable_daemons.get(daemon_type, daemon_type)))
 
 
-def collect_checks(module):
+def collect_checks(module, only_prechecks=False):
     checks = [i for i in dir(module) if i.startswith('check')]
+    if only_prechecks:
+        checks = [check for check in checks if getattr(module, check).get("_precheck", False)]
     return checks

@@ -14,7 +14,7 @@ check: Run for all the configured nodes in the configuration
 
 Options:
   --ignore              Comma-separated list of errors and warnings to ignore.
-
+  --only-prechecks      Only run checks that are valid before ceph has been installed or configured.
 
 Loaded Config Path: {config_path}
 
@@ -44,7 +44,7 @@ Configured Nodes:
         )
 
     def main(self):
-        options = ['--ignore']
+        options = ['--ignore', '--only-prechecks']
         parser = Transport(
             self.argv, options=options,
             check_version=False
@@ -63,6 +63,7 @@ Configured Nodes:
                 ceph_medic.metadata['nodes'][daemon].append({'host': node['host']})
 
         collector.collect()
-        test = runner.Runner()
+        only_prechecks = parser.has("--only-prechecks")
+        test = runner.Runner(only_prechecks=only_prechecks)
         results = test.run()
         runner.report(results)
