@@ -8,10 +8,12 @@ class TestRunner(object):
     def setup(self):
         # clear metadata
         ceph_medic.metadata = base_metadata
+        runner.metadata = base_metadata
 
     def teardown(self):
         # clear metadata
         ceph_medic.metadata = base_metadata
+        runner.metadata = base_metadata
 
     def test_calculate_total_hosts_is_0(self):
         run = runner.Runner()
