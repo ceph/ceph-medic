@@ -73,7 +73,7 @@ class Runner(object):
                         code = terminal.red(code)
                     elif code.startswith('W'):
                         code = terminal.yellow(code)
-                    print "   %s: %s" % (code, message)
+                    terminal.write.write("   %s: %s" % (code, message))
                     has_error = True
                 else:
                     self.passed += 1
