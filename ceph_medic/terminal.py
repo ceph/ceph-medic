@@ -108,11 +108,12 @@ _level_colors = {
 
 class _Write(object):
 
-    def __init__(self, _writer=None, prefix='', suffix='', flush=False):
+    def __init__(self, _writer=None, prefix='', suffix='', clear_line=False, flush=False):
         self._writer = _writer or sys.stdout
         self.suffix = suffix
         self.prefix = prefix
         self.flush = flush
+        self.clear_line = clear_line
 
     def bold(self, string):
         self.write(bold(string))
@@ -121,13 +122,20 @@ class _Write(object):
         self.write(string + '\n')
 
     def write(self, line):
+        padding = ''
+        if self.clear_line:
+            if len(line) > 80:
+                padding = ' ' * 10
+            else:
+                padding = ' ' * (80 - len(line))
+        line = line + padding
         self._writer.write(self.prefix + line + self.suffix)
         if self.flush:
             self._writer.flush()
 
 
 write = _Write()
-loader = _Write(prefix='\r')
+loader = _Write(prefix='\r', clear_line=True)
 
 
 class LogMessage(object):
