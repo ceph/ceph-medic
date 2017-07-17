@@ -59,7 +59,8 @@ class Runner(object):
                         continue
                     self.failed += 1
                     if not has_error:
-                        terminal.loader.write(' %s\n' % terminal.red(host))
+                        terminal.loader.write(' %s' % terminal.red(host))
+                    terminal.write.write('\n')
 
                     if code.startswith('E'):
                         code = terminal.red(code)
