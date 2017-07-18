@@ -14,7 +14,15 @@ class Runner(object):
         self.total = 0
         self.ignore = []
         self.errors = []
-        self.total_hosts = len(metadata['nodes'].keys())
+
+    @property
+    def total_hosts(self):
+        # XXX does not ensure unique nodes. In collocated scenarios, a single
+        # node that is a 'mon' and an 'osd' would count as two nodes
+        count = 0
+        for daemon in metadata['nodes'].values():
+            count += len(daemon)
+        return count
 
     def run(self):
         """
@@ -65,7 +73,7 @@ class Runner(object):
                         code = terminal.red(code)
                     elif code.startswith('W'):
                         code = terminal.yellow(code)
-                    print "   %s: %s" % (code, message)
+                    terminal.write.write("   %s: %s" % (code, message))
                     has_error = True
                 else:
                     self.passed += 1
