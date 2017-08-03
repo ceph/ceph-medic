@@ -31,3 +31,41 @@ class TestRunner(object):
         runner.metadata = ceph_medic.metadata
         run = runner.Runner()
         assert run.total_hosts == 4
+
+
+class FakeWriter(object):
+
+    def __init__(self):
+        self.calls = []
+
+    def raw(self, string):
+        self.calls.append(string)
+
+
+class TestReport(object):
+
+    def setup(self):
+        # clear metadata
+        ceph_medic.metadata = base_metadata
+        runner.metadata = base_metadata
+        runner.metadata['nodes'] = {}
+        self.results = runner.Runner()
+
+    def teardown(self):
+        # clear metadata
+        ceph_medic.metadata = base_metadata
+        runner.metadata = base_metadata
+        runner.metadata['nodes'] = {}
+
+    def test_reports_errors(self, monkeypatch):
+        fake_writer = FakeWriter()
+        monkeypatch.setattr(runner.terminal, 'write', fake_writer)
+        self.results.errors = ['I am an error']
+        runner.report(self.results)
+        assert 'While running checks, ceph-medic had unhandled errors' in fake_writer.calls[-1]
+
+    def test_reports_no_errors(self, monkeypatch):
+        fake_writer = FakeWriter()
+        monkeypatch.setattr(runner.terminal, 'write', fake_writer)
+        runner.report(self.results)
+        assert fake_writer.calls[0] == '\n0 passed, on 0 hosts'
