@@ -83,10 +83,10 @@ class Runner(object):
             terminal.loader.write(' %s\n' % terminal.green(host))
 
 
-run_errors = """
+run_errors = terminal.yellow("""
 While running checks, ceph-medic had unhandled errors, please look at the
 configured log file and report the issue along with the traceback.
-"""
+""")
 
 
 def report(results):
@@ -94,6 +94,8 @@ def report(results):
 
     if results.failed:
         msg = terminal.red(msg)
+    elif results.errors:
+        msg = terminal.yellow(msg)
     else:
         msg = terminal.green(msg)
 
@@ -107,7 +109,7 @@ def report(results):
         )
     )
     if results.errors:
-        terminal.yellow(run_errors)
+        terminal.write.raw(run_errors)
 
 
 start_header_tmpl = """
