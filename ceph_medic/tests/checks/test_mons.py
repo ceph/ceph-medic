@@ -77,3 +77,16 @@ class TestGetMonitorDirs(object):
             '/var/lib/ceph/something'])
 
         assert result == set(['ceph-mon-1', 'ceph-mon-2'])
+
+
+class TestOsdDirs(object):
+
+    def test_get_osd_dirs_nested_multiple(self):
+        result = mons.get_osd_dirs([
+            '/var/lib/ceph/osd/ceph-1',
+            '/var/lib/ceph/osd/ceph-1/nested/dir/',
+            '/var/lib/ceph/osd/ceph-1/other/nested',
+            '/var/lib/ceph/osd/ceph-2',
+            '/var/lib/ceph/something'])
+
+        assert result == set(['ceph-1', 'ceph-2'])
