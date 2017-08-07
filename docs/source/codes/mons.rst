@@ -21,3 +21,10 @@ Warnings
 WMON1
 _____
 Multiple monitor directories are found on the same host.
+
+.. _WMON2:
+
+WMON2
+_____
+Collocated OSDs in monitors nodes where found on the same host.
+
