@@ -68,13 +68,16 @@ class Runner(object):
                     self.failed += 1
                     if not has_error:
                         terminal.loader.write(' %s' % terminal.red(host))
-                    terminal.write.write('\n')
+                        terminal.write.write('\n')
 
                     if code.startswith('E'):
                         code = terminal.red(code)
                     elif code.startswith('W'):
                         code = terminal.yellow(code)
-                    terminal.write.write("   %s: %s" % (code, message))
+                    if not has_error:
+                        terminal.write.write("   %s: %s\n" % (code, message))
+                    else:
+                        terminal.write.write("   %s: %s" % (code, message))
                     has_error = True
                 else:
                     self.passed += 1
