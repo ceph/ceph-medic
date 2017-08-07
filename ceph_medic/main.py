@@ -45,10 +45,10 @@ Global Options:
 
     def help(self, sub_help=None):
         if self.hosts_file is None:
-            hosts_file_header = terminal.red('Loaded Hosts file')
+            hosts_file_header = terminal.red('Loaded Inventory Hosts file')
             hosts_file = 'No hosts file found in cwd, /etc/ansible/, or configured'
         else:
-            hosts_file_header = terminal.green('Loaded Hosts file')
+            hosts_file_header = terminal.green('Loaded Inventory Hosts file')
             hosts_file = self.hosts_file
         return self._help.format(
             version=ceph_medic.__version__,
@@ -63,7 +63,7 @@ Global Options:
     @property
     def configured_nodes(self):
         _help = dedent("""
-            Configured nodes (loaded from inventory file):
+            Configured nodes (loaded from inventory hosts file):
               OSDs: {osd_node_count}
               MONs: {mon_node_count}
               MGRs: {mgr_node_count}
