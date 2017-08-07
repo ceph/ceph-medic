@@ -55,9 +55,30 @@ def get_monitor_dirs(dirs):
     return set(found)
 
 
+def get_osd_dirs(dirs):
+    """
+    Find all the /var/lib/ceph/osd/* directories. This is a bit tricky because
+    we don't know if there are nested directories (the metadata reports them in
+    a flat list).
+    We must go through all of them and make sure that by splitting there aren't
+    any nested ones and we are only reporting actual monitor dirs.
+    """
+    # get all the actual monitor dirs
+    found = []
+    prefix = '/var/lib/ceph/osd/'
+    osd_dirs = [d for d in dirs if d.startswith(prefix)]
+    for _dir in osd_dirs:
+        # splitting on prefix[-1] will give us:
+        # 'ceph-1/maybe/nested' or 'ceph-1'
+        dirs = _dir.split(prefix)[-1].split('/')
+        # splitting again on '/' and using the first part will ensure we only
+        # get the dir
+        found.append(dirs[0])
+    return set(found)
 #
 # Error Checks
 #
+
 
 def check_mon_secret(host, data):
     code = 'EMON1'
@@ -86,3 +107,12 @@ def check_multiple_mon_dirs(host, data):
     monitor_dirs = get_monitor_dirs(dirs)
     if len(monitor_dirs) > 1:
         return code, msg % ','.join(monitor_dirs)
+
+
+def check_mon_collocated_with_osd(host, data):
+    code = 'WMON2'
+    msg = 'collocated OSDs found: %s'
+    dirs = data['paths']['/var/lib/ceph']['dirs']
+    osd_dirs = get_osd_dirs(dirs)
+    if len(osd_dirs):
+        return code, msg % ','.join(osd_dirs)
