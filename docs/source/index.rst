@@ -20,7 +20,7 @@ Installation
 official upstream repos
 -----------------------
 
-Download official releases of ``ceph-medic`` at https://www.download.ceph.com/ceph-medic
+Download official releases of ``ceph-medic`` at https://download.ceph.com/ceph-medic
 
 Currently, only rpm repos built for centos 7 are supported.
 
