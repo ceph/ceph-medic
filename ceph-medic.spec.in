@@ -16,6 +16,7 @@ BuildRequires:  python-setuptools
 BuildRequires:  pytest
 BuildRequires:  python-remoto
 BuildRequires:  python-mock
+BuildRequires:  python-tambo
 Requires:       python-remoto
 Requires:       python-tambo
 Requires:       python-execnet
