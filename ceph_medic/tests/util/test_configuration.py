@@ -1,4 +1,5 @@
 import os
+import pytest
 from ceph_medic.util import configuration
 
 
@@ -42,6 +43,10 @@ class TestFlatInventory(object):
         make_hosts_file(filename, contents)
         result = configuration.AnsibleInventoryParser(filename).nodes
         assert 'test' not in result
+
+    def test_hosts_file_does_not_exist(self):
+        with pytest.raises(SystemExit):
+            configuration.load_hosts(_path="/fake/path")
 
 
 class TestNestedInventory(object):

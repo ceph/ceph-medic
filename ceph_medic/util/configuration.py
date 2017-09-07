@@ -8,6 +8,7 @@ except ImportError:
     from io import StringIO
 import logging
 import os
+import sys
 from os import path
 import re
 from ceph_medic import terminal, metadata
@@ -102,6 +103,9 @@ def load_hosts(_path=None):
     is not loaded. Try the hardest to load one, and return an empty dictionary
     if nothing is found.
     """
+    if _path and not os.path.exists(_path):
+        terminal.error("the given inventory path does not exist: %s" % _path)
+        sys.exit()
     _path = _path or get_host_file()
     return AnsibleInventoryParser(_path)
 
