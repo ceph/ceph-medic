@@ -1,6 +1,8 @@
 ---
 
-ceph_stable: True
+ceph_origin: repository
+ceph_repository: community
+ceph_stable_release: luminous
 cluster: test
 public_network: "192.168.3.0/24"
 cluster_network: "192.168.4.0/24"
@@ -10,7 +12,7 @@ osd_objectstore: "filestore"
 devices:
   - '/dev/sda'
   - '/dev/sdb'
-journal_collocation: True
+osd_scenario: collocated
 os_tuning_params:
   - { name: kernel.pid_max, value: 4194303 }
   - { name: fs.file-max, value: 26234859 }
