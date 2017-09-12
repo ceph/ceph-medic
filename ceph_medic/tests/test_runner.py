@@ -1,4 +1,3 @@
-import pytest
 import ceph_medic
 from ceph_medic import runner
 from ceph_medic.tests import base_metadata
@@ -49,19 +48,14 @@ class TestReport(object):
         runner.metadata = base_metadata
         runner.metadata['nodes'] = {}
 
-    def test_reports_errors(self, monkeypatch):
-        fake_writer = FakeWriter()
-        monkeypatch.setattr(runner.terminal, 'write', fake_writer)
+    def test_reports_errors(self, terminal):
         self.results.errors = ['I am an error']
         runner.report(self.results)
-        assert 'While running checks, ceph-medic had unhandled errors' in fake_writer.calls[-1]
+        assert 'While running checks, ceph-medic had unhandled errors' in terminal.calls[-1]
 
-    def test_reports_no_errors(self, monkeypatch):
-        fake_writer = FakeWriter()
-        monkeypatch.setattr(runner.terminal, 'write', fake_writer)
+    def test_reports_no_errors(self, terminal):
         runner.report(self.results)
-        assert fake_writer.calls[0] == '\n0 passed, on 0 hosts'
-
+        assert terminal.calls[0] == '\n0 passed, on 0 hosts'
 
 
 class TestReportBasicOutput(object):
