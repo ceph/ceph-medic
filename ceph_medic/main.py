@@ -1,5 +1,6 @@
 from ceph_medic import check, log
 import sys
+import os
 from textwrap import dedent
 from tambo import Transport
 from execnet.gateway_bootstrap import HostNotFound
@@ -105,6 +106,11 @@ Global Options:
 
         # SSH config
         ceph_medic.config['ssh_config'] = parser.get('--ssh-config')
+        if ceph_medic.config['ssh_config']:
+            ssh_config_path = ceph_medic.config['ssh_config']
+            if not os.path.exists(ssh_config_path):
+                terminal.error("the given ssh config path does not exist: %s" % ssh_config_path)
+                sys.exit()
 
         ceph_medic.config['cluster_name'] = parser.get('--cluster')
         ceph_medic.metadata['cluster_name'] = 'ceph'
