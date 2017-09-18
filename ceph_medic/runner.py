@@ -54,6 +54,7 @@ class Runner(object):
                     # the code is ignored, maybe introspecting the function?
                     result = getattr(module, check)(host, data)
                 except Exception as error:
+                    result = None
                     logger.exception('check had an unhandled error: %s', check)
                     self.errors.append(error)
                 if result:
@@ -74,10 +75,7 @@ class Runner(object):
                         code = terminal.red(code)
                     elif code.startswith('W'):
                         code = terminal.yellow(code)
-                    if not has_error:
-                        terminal.write.write("   %s: %s\n" % (code, message))
-                    else:
-                        terminal.write.write("   %s: %s" % (code, message))
+                    terminal.write.write("   %s: %s\n" % (code, message))
                     has_error = True
                 else:
                     self.passed += 1
