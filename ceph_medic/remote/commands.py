@@ -14,6 +14,14 @@ def ceph_version(conn):
         conn.logger.exception('failed to fetch ceph version')
 
 
+def ceph_socket_version(conn, socket):
+    try:
+        output, _, _ = check(conn, ['ceph', '--admin-daemon', socket, 'version'])
+        return output[0]
+    except RuntimeError:
+        conn.logger.exception('failed to fetch ceph socket version')
+
+
 def ceph_is_installed(conn):
     try:
         stdout, stderr, exit_code = check(conn, ['which', 'ceph'])
