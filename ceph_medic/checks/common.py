@@ -70,3 +70,19 @@ def check_cluster_fsid(host, data):
 
     if mismatched_hosts:
         return code, msg % (current_fsid, ','.join(mismatched_hosts))
+
+
+def check_ceph_version_parity(host, data):
+    code = 'ECOM6'
+    msg = '(installed) Ceph version "%s" is different than host(s): %s'
+    mismatched_hosts = []
+    host_version = data['ceph']['version']
+    for daemon, hosts in metadata['nodes'].items():
+        for host in hosts:
+            hostname = host['host']
+            version = metadata[daemon][hostname]['ceph']['version']
+            if host_version != version:
+                mismatched_hosts.append(hostname)
+
+    if mismatched_hosts:
+        return code, msg % (host_version, ','.join(mismatched_hosts))
