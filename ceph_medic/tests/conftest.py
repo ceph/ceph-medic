@@ -42,18 +42,54 @@ def terminal(monkeypatch):
     monkeypatch.setattr(runner.terminal, 'write', fake_writer)
     return fake_writer
 
+
 @pytest.fixture
 def data():
     """
     Default data structure for remote nodes
     """
-    def make_data():
+    def _data():
         return {
-            'ceph': {'installed': True},
+            'ceph': {'installed': True, 'version': '12.2.1'},
             'paths': {
                 '/etc/ceph': {'files': {}, 'dirs': {}},
                 '/var/lib/ceph': {'files': {}, 'dirs': {}},
             }
         }
-    return make_data
+    return _data
 
+
+@pytest.fixture
+def make_data(data, **kw):
+    """
+    Customize basic data structure on remote nodes
+    """
+    def update(dictionary=None):
+        base = data()
+        if not dictionary:
+            return base
+        base.update(dictionary)
+        return base
+    return update
+
+
+@pytest.fixture
+def make_nodes():
+    """
+    Helper to generate nodes for daemons
+    """
+    def make_data(**kw):
+        """
+        ``kw`` is expected to be a mapping between daemon name and hosts for
+        that daemon, like::
+
+            make_data(mons=['node1', 'node2']
+        """
+        # default set of nodes
+        data = dict(
+            (k, {}) for k in ['rgws', 'mgrs', 'mdss', 'clients', 'osds', 'mons']
+        )
+        for daemon, node_names in kw.items():
+            data[daemon] = [dict(host=node_name) for node_name in node_names]
+        return data
+    return make_data
