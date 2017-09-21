@@ -35,3 +35,10 @@ ECOM5
 _____
 The ``fsid`` defined in the configuration differs from other nodes in the cluster. The ``fsid`` must be
 the same for all nodes in the cluster.
+
+.. _ECOM6:
+
+ECOM6
+_____
+The installed version of ``ceph`` is not the same for all nodes in the cluster. The ``ceph`` version should be
+the same for all nodes in the cluster.
