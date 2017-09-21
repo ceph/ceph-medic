@@ -86,9 +86,15 @@ def check_mon_secret(host, data):
     mismatched_hosts = []
 
     current_secret = get_secret(data)
+    if not current_secret:
+        # there is no file for the current host, so we can't compare
+        return
 
     for host, host_data in metadata['mons'].items():
         host_secret = get_secret(host_data)
+        if not host_secret:
+            # cannot compare with another host that may not have the secret
+            continue
         if current_secret != host_secret:
             mismatched_hosts.append(host)
 
