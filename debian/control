@@ -6,7 +6,9 @@ Build-Depends:
  debhelper (>= 7),
  dh-python,
  python,
+ python-mock,
  python-pytest,
+ python-remoto,
  python-setuptools,
  python-tambo
 X-Python-Version: >= 2.7
