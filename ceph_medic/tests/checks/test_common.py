@@ -35,3 +35,28 @@ class TestGetFsid(object):
         data = self.make_metadata("[global]\nfsid = 1234-lkjh   \n\n[mdss]\ndisabled=true\n")
         fsid = common.get_fsid(data)
         assert fsid == '1234-lkjh'
+
+
+class TestCephVersionParity(object):
+
+    def setup(self):
+        metadata['cluster_name'] = 'ceph'
+
+    def teardown(self):
+        metadata.pop('cluster_name')
+
+    def test_finds_a_mismatch_of_versions(self, make_nodes, make_data):
+        metadata['nodes'] = make_nodes(mons=['node1', 'node2'])
+        node1_data = make_data()
+        metadata['mons']['node1'] = node1_data
+        metadata['mons']['node2'] = make_data({'ceph': {'version': '13'}})
+        result = common.check_ceph_version_parity('node1', node1_data)
+        assert 'Ceph version "12.2.1" is different' in str(result)
+
+    def test_versions_have_parity(self, make_nodes, make_data):
+        metadata['nodes'] = make_nodes(mons=['node1', 'node2'])
+        node1_data = make_data()
+        metadata['mons']['node1'] = node1_data
+        metadata['mons']['node2'] = make_data()
+        result = common.check_ceph_version_parity('node1', node1_data)
+        assert result is None
