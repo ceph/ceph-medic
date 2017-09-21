@@ -7,6 +7,7 @@ from ceph_medic.terminal import loader
 from ceph_medic.connection import get_connection
 from execnet.gateway_bootstrap import HostNotFound
 import logging
+import json
 
 
 logger = logging.getLogger(__name__)
@@ -140,6 +141,11 @@ def get_node_metadata(conn, hostname, cluster_nodes):
     node_metadata['ceph'] = collect_ceph_info(conn)
     loader.write('Host: %-*s  collecting: [%s]' % (20, hostname, terminal.green('ceph information')))
 
+    # collect socket information
+    loader.write('Host: %-*s  collecting: [%s]' % (20, hostname, terminal.yellow('ceph socket information')))
+    node_metadata['sockets'] = collect_socket_info(conn, node_metadata)
+    loader.write('Host: %-*s  collecting: [%s]' % (20, hostname, terminal.green('ceph socket information')))
+
     return node_metadata
 
 
@@ -220,4 +226,15 @@ def collect_ceph_info(conn):
     result = dict()
     result['version'] = remote.commands.ceph_version(conn)
     result['installed'] = remote.commands.ceph_is_installed(conn)
+    return result
+
+
+# Ceph socket info
+#
+def collect_socket_info(conn, node_metadata):
+    sockets = [socket for socket in node_metadata['paths']['/var/run/ceph']['files']
+               if socket.endswith(".asok")]
+    result = dict()
+    for socket in sockets:
+        result[socket] = json.loads(remote.commands.ceph_socket_version(conn, socket))
     return result
