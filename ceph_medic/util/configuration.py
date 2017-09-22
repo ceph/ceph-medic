@@ -233,6 +233,21 @@ class Conf(configparser.SafeConfigParser):
         # strip spaces
         return [x.strip() for x in value]
 
+    def optionxform(self, s):
+        """
+        Ceph configuration allows both these forms (considering them equal)::
+
+            some key option = 1
+            some_key_option = 1
+
+        This method ensures that regardless of any of the formats, all options
+        will be treated as using the underscores. This is also how ceph-deploy
+        reads Ceph configuration values
+        """
+        s = s.replace('_', ' ')
+        s = '_'.join(s.split())
+        return s
+
 
 class AnsibleInventoryParser(object):
     """
