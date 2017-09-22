@@ -1,5 +1,6 @@
 import os
 import pytest
+from textwrap import dedent
 from ceph_medic.util import configuration
 
 
@@ -92,3 +93,22 @@ class TestNestedInventory(object):
         make_hosts_file(filename, contents)
         result = configuration.AnsibleInventoryParser(filename).nodes
         assert result['mons'][0]['host'] == 'mon0'
+
+
+class TestLoadString(object):
+
+    def test_loads_valid_ceph_key(self):
+        contents = dedent("""
+        [global]
+        cluster = ceph
+        """)
+        conf = configuration.load_string(contents)
+        assert conf.get_safe('global', 'cluster') == 'ceph'
+
+    def test_loads_key_with_spaces_converted(self):
+        contents = dedent("""
+        [global]
+        some key here = ceph
+        """)
+        conf = configuration.load_string(contents)
+        assert conf.get_safe('global', 'some_key_here') == 'ceph'
