@@ -138,6 +138,7 @@ def get_node_metadata(conn, hostname, cluster_nodes):
     # collect ceph information
     loader.write('Host: %-*s  collecting: [%s]' % (20, hostname, terminal.yellow('ceph information')))
     node_metadata['ceph'] = collect_ceph_info(conn)
+    node_metadata['ceph']['sockets'] = collect_socket_info(conn, node_metadata)
     loader.write('Host: %-*s  collecting: [%s]' % (20, hostname, terminal.green('ceph information')))
 
     return node_metadata
@@ -220,4 +221,15 @@ def collect_ceph_info(conn):
     result = dict()
     result['version'] = remote.commands.ceph_version(conn)
     result['installed'] = remote.commands.ceph_is_installed(conn)
+    return result
+
+
+# Ceph socket info
+#
+def collect_socket_info(conn, node_metadata):
+    sockets = [socket for socket in node_metadata['paths']['/var/run/ceph']['files']
+               if socket.endswith(".asok")]
+    result = dict()
+    for socket in sockets:
+        result[socket] = remote.commands.ceph_socket_version(conn, socket)
     return result

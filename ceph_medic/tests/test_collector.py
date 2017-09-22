@@ -88,6 +88,29 @@ class TestCollectPaths(object):
         assert path in result
 
 
+class TestCollectSocketInfo(object):
+
+    def tests_collects_sockets(self, monkeypatch):
+        monkeypatch.setattr(collector.remote.commands, 'ceph_socket_version', lambda conn, socket: dict())
+        metadata = {
+            'paths': {
+                '/var/run/ceph': {'files': ['/var/run/ceph/osd.asok']},
+            },
+        }
+        result = collector.collect_socket_info(Mock(), metadata)
+        assert '/var/run/ceph/osd.asok' in result
+
+    def test_ignores_unknown_files(self, monkeypatch):
+        monkeypatch.setattr(collector.remote.commands, 'ceph_socket_version', lambda conn, socket: dict())
+        metadata = {
+            'paths': {
+                '/var/run/ceph': {'files': ['/var/run/ceph/osd.asok', '/var/run/ceph/osd.log']},
+            },
+        }
+        result = collector.collect_socket_info(Mock(), metadata)
+        assert '/var/run/ceph/osd.log' not in result
+
+
 class TestCollect(object):
 
     def setup(self):
@@ -130,5 +153,6 @@ class TestGetNodeMetadata(object):
         monkeypatch.setattr(collector, "collect_paths", mock_metadata)
         monkeypatch.setattr(collector, "collect_network", mock_metadata)
         monkeypatch.setattr(collector, "collect_ceph_info", mock_metadata)
+        monkeypatch.setattr(collector, "collect_socket_info", mock_metadata)
         result = collector.get_node_metadata(Mock(), "mon0", [])
         assert key in result
