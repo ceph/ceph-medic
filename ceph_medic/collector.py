@@ -139,12 +139,8 @@ def get_node_metadata(conn, hostname, cluster_nodes):
     # collect ceph information
     loader.write('Host: %-*s  collecting: [%s]' % (20, hostname, terminal.yellow('ceph information')))
     node_metadata['ceph'] = collect_ceph_info(conn)
+    node_metadata['ceph']['sockets'] = collect_socket_info(conn, node_metadata)
     loader.write('Host: %-*s  collecting: [%s]' % (20, hostname, terminal.green('ceph information')))
-
-    # collect socket information
-    loader.write('Host: %-*s  collecting: [%s]' % (20, hostname, terminal.yellow('ceph socket information')))
-    node_metadata['sockets'] = collect_socket_info(conn, node_metadata)
-    loader.write('Host: %-*s  collecting: [%s]' % (20, hostname, terminal.green('ceph socket information')))
 
     return node_metadata
 
