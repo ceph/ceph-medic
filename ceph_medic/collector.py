@@ -7,7 +7,6 @@ from ceph_medic.terminal import loader
 from ceph_medic.connection import get_connection
 from execnet.gateway_bootstrap import HostNotFound
 import logging
-import json
 
 
 logger = logging.getLogger(__name__)
@@ -232,5 +231,5 @@ def collect_socket_info(conn, node_metadata):
                if socket.endswith(".asok")]
     result = dict()
     for socket in sockets:
-        result[socket] = json.loads(remote.commands.ceph_socket_version(conn, socket))
+        result[socket] = remote.commands.ceph_socket_version(conn, socket)
     return result
