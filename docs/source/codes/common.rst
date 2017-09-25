@@ -42,3 +42,9 @@ ECOM6
 _____
 The installed version of ``ceph`` is not the same for all nodes in the cluster. The ``ceph`` version should be
 the same for all nodes in the cluster.
+
+ECOM7
+_____
+The installed version of ``ceph`` is not the same reported by a running ceph daemon. The installed ``ceph`` version should be
+the same as all running ceph daemons, if they do not match these daemons most likely have not been restarted correctly after
+a version change.

@@ -60,3 +60,42 @@ class TestCephVersionParity(object):
         metadata['mons']['node2'] = make_data()
         result = common.check_ceph_version_parity('node1', node1_data)
         assert result is None
+
+
+class TestCephSocketAndInstalledVersionParity(object):
+
+    def setup(self):
+        metadata['cluster_name'] = 'ceph'
+
+    def teardown(self):
+        metadata.pop('cluster_name')
+
+    def test_finds_a_mismatch_of_versions(self, make_nodes, make_data):
+        metadata['nodes'] = make_nodes(mons=['node1'])
+        node1_data = make_data(
+            {'ceph': {
+                "sockets": {
+                    "/var/run/ceph/osd.asok": {"version": "13.2.0"},
+                },
+                "installed": True,
+                "version": "12.2.1",
+            }}
+        )
+        metadata['mons']['node1'] = node1_data
+        result = common.check_ceph_socket_and_installed_version_parity('node1', node1_data)
+        assert 'Ceph version "12.2.1" is different' in str(result)
+
+    def test_versions_have_parity(self, make_nodes, make_data):
+        metadata['nodes'] = make_nodes(mons=['node1'])
+        node1_data = make_data(
+            {'ceph': {
+                "sockets": {
+                    "/var/run/ceph/osd.asok": {"version": "12.2.1"},
+                },
+                "installed": True,
+                "version": "12.2.1",
+            }}
+        )
+        metadata['mons']['node1'] = node1_data
+        result = common.check_ceph_socket_and_installed_version_parity('node1', node1_data)
+        assert result is None

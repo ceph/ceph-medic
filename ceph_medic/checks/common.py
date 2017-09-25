@@ -86,3 +86,18 @@ def check_ceph_version_parity(host, data):
 
     if mismatched_hosts:
         return code, msg % (host_version, ','.join(mismatched_hosts))
+
+
+def check_ceph_socket_and_installed_version_parity(host, data):
+    code = 'ECOM7'
+    msg = '(installed) Ceph version "%s" is different than version from running socket(s): %s'
+    mismatched_sockets = []
+    host_version = data['ceph']['version']
+    sockets = data['ceph']['sockets']
+    for socket, socket_data in sockets.items():
+        socket_version = socket_data.get('version')
+        if socket_version and socket_version != host_version:
+            mismatched_sockets.append("%s:%s" % (socket, socket_version))
+
+    if mismatched_sockets:
+        return code, msg % (host_version, ','.join(mismatched_sockets))
