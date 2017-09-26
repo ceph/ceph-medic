@@ -96,7 +96,7 @@ def check_ceph_socket_and_installed_version_parity(host, data):
     sockets = data['ceph']['sockets']
     for socket, socket_data in sockets.items():
         socket_version = socket_data.get('version')
-        if socket_version and socket_version != host_version:
+        if socket_version and socket_version not in host_version:
             mismatched_sockets.append("%s:%s" % (socket, socket_version))
 
     if mismatched_sockets:

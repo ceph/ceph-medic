@@ -90,10 +90,10 @@ class TestCephSocketAndInstalledVersionParity(object):
         node1_data = make_data(
             {'ceph': {
                 "sockets": {
-                    "/var/run/ceph/osd.asok": {"version": "12.2.1"},
+                    "/var/run/ceph/osd.asok": {"version": "12.2.0"},
                 },
                 "installed": True,
-                "version": "12.2.1",
+                "version": "ceph version 12.2.0 (32ce2a3ae5239ee33d6150705cdb24d43bab910c) luminous (rc)",
             }}
         )
         metadata['mons']['node1'] = node1_data
