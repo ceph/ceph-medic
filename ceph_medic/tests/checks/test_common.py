@@ -99,3 +99,18 @@ class TestCephSocketAndInstalledVersionParity(object):
         metadata['mons']['node1'] = node1_data
         result = common.check_ceph_socket_and_installed_version_parity('node1', node1_data)
         assert result is None
+
+    def test_socket_version_is_none(self, make_nodes, make_data):
+        metadata['nodes'] = make_nodes(mons=['node1'])
+        node1_data = make_data(
+            {'ceph': {
+                "sockets": {
+                    "/var/run/ceph/osd.asok": {},
+                },
+                "installed": True,
+                "version": "12.2.1",
+            }}
+        )
+        metadata['mons']['node1'] = node1_data
+        result = common.check_ceph_socket_and_installed_version_parity('node1', node1_data)
+        assert result is None
