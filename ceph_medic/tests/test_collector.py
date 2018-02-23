@@ -1,5 +1,4 @@
 import pytest
-import copy
 
 from ceph_medic import collector, metadata
 from mock import Mock
@@ -113,17 +112,6 @@ class TestCollectSocketInfo(object):
 
 class TestCollect(object):
 
-    def setup(self):
-        self.old_metadata = copy.deepcopy(metadata)
-        metadata["nodes"] = {
-            "mons": [{"host": "mon0"}],
-            "osds": [{"host": "osd0"}],
-        }
-        metadata["cluster_name"] = "ceph"
-
-    def teardown(self):
-        metadata = self.old_metadata  # noqa
-
     def test_ignores_unknown_group(self):
         metadata["nodes"] = dict(test=[])
         # raises a RuntimeError because all nodes fail to connect
@@ -131,6 +119,11 @@ class TestCollect(object):
             collector.collect()
 
     def test_collects_node_metadata(self, monkeypatch):
+        metadata["nodes"] = {
+            "mons": [{"host": "mon0"}],
+            "osds": [{"host": "osd0"}],
+        }
+        metadata["cluster_name"] = "ceph"
         def mock_metadata(conn, hostname, cluster_nodes):
             return dict(meta="data")
         monkeypatch.setattr(collector, "get_connection", lambda host: Mock())
