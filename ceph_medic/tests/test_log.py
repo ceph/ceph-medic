@@ -28,4 +28,9 @@ class TestLogSetup(object):
         config = configuration.load(location)
         log.setup(config)
         logger = logging.getLogger()
-        assert len(logger.handlers) == 1
+        # tox has its own logger now, we need to make sure we are talking about the
+        # actual configured ones by ceph-medic
+        ceph_medic_loggers = [
+            i for i in logger.handlers if 'ceph-medic' in getattr(i, 'baseFilename', '')
+        ]
+        assert len(ceph_medic_loggers) == 1
