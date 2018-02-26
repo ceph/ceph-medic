@@ -41,3 +41,15 @@ def check_min_pool_size(host, data):
     size = conf.get_safe('global', 'osd_pool_default_min_size', '0')
     if int(size) == 1:
         return code, msg
+
+
+def check_min_osd_nodes(host, data):
+    code = 'WOSD3'
+    msg = 'OSD nodes might not be enough for a healthy cluster (%s needed, %s found)'
+    conf = get_ceph_conf(data)
+    default_size = int(conf.get_safe('global', 'osd_pool_default_size', '3'))
+    min_size = int(conf.get_safe('global', 'osd_pool_default_min_size', '0'))
+    magical_number = default_size + min_size + 1
+    osd_nodes = len(metadata['osds'])
+    if magical_number > osd_nodes:
+        return code, msg % (magical_number, osd_nodes)

@@ -7,9 +7,6 @@ class TestGetFsid(object):
     def setup(self):
         metadata['cluster_name'] = 'ceph'
 
-    def teardown(self):
-        metadata.pop('cluster_name')
-
     def make_metadata(self, contents=None):
         contents = contents or ''
         data = {'paths': {'/etc/ceph':{'files':{'/etc/ceph/ceph.conf':{'contents': contents}}}}}
@@ -42,9 +39,6 @@ class TestCephVersionParity(object):
     def setup(self):
         metadata['cluster_name'] = 'ceph'
 
-    def teardown(self):
-        metadata.pop('cluster_name')
-
     def test_finds_a_mismatch_of_versions(self, make_nodes, make_data):
         metadata['nodes'] = make_nodes(mons=['node1', 'node2'])
         node1_data = make_data()
@@ -66,9 +60,6 @@ class TestCephSocketAndInstalledVersionParity(object):
 
     def setup(self):
         metadata['cluster_name'] = 'ceph'
-
-    def teardown(self):
-        metadata.pop('cluster_name')
 
     def test_finds_a_mismatch_of_versions(self, make_nodes, make_data):
         metadata['nodes'] = make_nodes(mons=['node1'])

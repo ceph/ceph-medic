@@ -1,6 +1,8 @@
 import pytest
 import random
 from ceph_medic import runner
+import ceph_medic
+from ceph_medic.tests import base_metadata
 
 
 class FakeWriter(object):
@@ -18,6 +20,11 @@ class FakeWriter(object):
 
     def get_output(self):
         return '\n'.join(self.calls)
+
+
+@pytest.fixture(scope='class', autouse=True)
+def clear_metadata():
+    ceph_medic.metadata = base_metadata
 
 
 @pytest.fixture
