@@ -130,3 +130,11 @@ def check_mon_recommended_count(host, data):
     mon_count = len(metadata['mons'].keys())
     if mon_count < 3:
         return code, msg % mon_count
+
+
+def check_mon_count_is_odd(host, data):
+    code = 'WMON4'
+    msg = 'Number of MONs is not an odd number: %s'
+    mon_count = len(metadata['mons'].keys())
+    if mon_count % 2 == 0:
+        return code, msg % mon_count
