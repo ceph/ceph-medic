@@ -23,7 +23,7 @@ def get_secret(data):
     _path = data['paths']['/var/lib/ceph']['files']
     for _file in file_paths:
         if _file.startswith('/var/lib/ceph/mon/') and _file.endswith('keyring'):
-            contents = _path[_file]['contents'] #.split('\n')
+            contents = _path[_file]['contents']
             conf = configuration.load_string(contents)
             try:
                 return conf.get_safe('mon.', 'key', '').split('\n')[0]
@@ -122,3 +122,19 @@ def check_mon_collocated_with_osd(host, data):
     osd_dirs = get_osd_dirs(dirs)
     if len(osd_dirs):
         return code, msg % ','.join(osd_dirs)
+
+
+def check_mon_recommended_count(host, data):
+    code = 'WMON3'
+    msg = 'Recommended number of MONs (3) not met: %s'
+    mon_count = len(metadata['mons'].keys())
+    if mon_count < 3:
+        return code, msg % mon_count
+
+
+def check_mon_count_is_odd(host, data):
+    code = 'WMON4'
+    msg = 'Number of MONs is not an odd number: %s'
+    mon_count = len(metadata['mons'].keys())
+    if mon_count % 2 == 0:
+        return code, msg % mon_count

@@ -1,3 +1,4 @@
+from ceph_medic import metadata
 from ceph_medic.checks import mons
 
 
@@ -9,7 +10,7 @@ class TestGetSecret(object):
                 '/var/lib/ceph': {
                     'files': {
                         '/var/lib/ceph/mon/ceph-mon-0/keyring': {
-                            'contents':'',
+                            'contents': '',
                         }
                     }
                 }
@@ -90,3 +91,39 @@ class TestOsdDirs(object):
             '/var/lib/ceph/something'])
 
         assert result == set(['ceph-1', 'ceph-2'])
+
+
+class TestMonRecommendedCount(object):
+
+    def test_recommended_count_is_met(self, data):
+        metadata['mons'] = dict(('mon%s' % count, []) for count in range(6))
+        metadata['cluster_name'] = 'ceph'
+        osd_data = data()
+        result = mons.check_mon_recommended_count(None, osd_data)
+        assert result is None
+
+    def test_recommended_count_is_unmet(self, data):
+        metadata['mons'] = dict(('mon%s' % count, []) for count in range(1))
+        metadata['cluster_name'] = 'ceph'
+        osd_data = data()
+        code, message = mons.check_mon_recommended_count(None, osd_data)
+        assert code == 'WMON3'
+        assert message == 'Recommended number of MONs (3) not met: 1'
+
+
+class TestMonCountIsOdd(object):
+
+    def test_count_is_odd(self, data):
+        metadata['mons'] = dict(('mon%s' % count, []) for count in range(3))
+        metadata['cluster_name'] = 'ceph'
+        osd_data = data()
+        result = mons.check_mon_count_is_odd(None, osd_data)
+        assert result is None
+
+    def test_recommended_count_is_unmet(self, data):
+        metadata['mons'] = dict(('mon%s' % count, []) for count in range(2))
+        metadata['cluster_name'] = 'ceph'
+        osd_data = data()
+        code, message = mons.check_mon_count_is_odd(None, osd_data)
+        assert code == 'WMON4'
+        assert message == 'Number of MONs is not an odd number: 2'
