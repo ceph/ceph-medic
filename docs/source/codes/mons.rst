@@ -40,3 +40,11 @@ WMON4
 _____
 It is recommended to have an odd number of monitors so that failures can be
 tolerated.
+
+
+.. _WMON5:
+
+WMON5
+_____
+Having a single monitor is not recommneded, as a failure would cause data loss.
+For high availability, at least 3 monitors is recommended.
