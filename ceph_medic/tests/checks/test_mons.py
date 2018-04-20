@@ -127,3 +127,19 @@ class TestMonCountIsOdd(object):
         code, message = mons.check_mon_count_is_odd(None, osd_data)
         assert code == 'WMON4'
         assert message == 'Number of MONs is not an odd number: 2'
+
+
+class TestSingleMon(object):
+
+    def test_is_single(self, data):
+        metadata['mons'] = {'mon.0': []}
+        metadata['cluster_name'] = 'ceph'
+        code, message = mons.check_for_single_mon(None, data())
+        assert code == 'WMON5'
+        assert message == 'A single monitor was detected: mon.0'
+
+    def test_is_not_single(self, data):
+        metadata['mons'] = dict(('mon%s' % count, []) for count in range(2))
+        metadata['cluster_name'] = 'ceph'
+        result = mons.check_for_single_mon(None, data())
+        assert result is None
