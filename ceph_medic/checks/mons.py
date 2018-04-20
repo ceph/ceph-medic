@@ -138,3 +138,11 @@ def check_mon_count_is_odd(host, data):
     mon_count = len(metadata['mons'].keys())
     if mon_count % 2 == 0:
         return code, msg % mon_count
+
+
+def check_for_single_mon(host, data):
+    code = 'WMON5'
+    msg = 'A single monitor was detected: %s'
+    monitors = list(metadata['mons'].keys())
+    if len(monitors) == 1:
+        return code, msg % monitors.pop()
