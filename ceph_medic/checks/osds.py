@@ -36,7 +36,7 @@ def check_osd_ceph_fsid(host, data):
 
 def check_min_pool_size(host, data):
     code = 'WOSD2'
-    msg = 'osd default pool size is set to 1, can potentially lose data'
+    msg = 'osd default pool min_size is set to 1, can potentially lose data'
     conf = get_ceph_conf(data)
     size = conf.get_safe('global', 'osd_pool_default_min_size', '0')
     if int(size) == 1:
