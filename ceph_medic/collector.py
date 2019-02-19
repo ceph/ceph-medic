@@ -190,7 +190,10 @@ def collect():
             metadata[node_type][node['host']] = get_node_metadata(conn, hostname, cluster_nodes)
             conn.exit()
     if failed_nodes == total_nodes:
-        loader.write(terminal.red('Collection failed!') + ' ' *70 + '\n')
+        loader.write(terminal.red('Collection failed!') + ' ' *70)
+        # TODO: this helps clear out the 'loader' line so that the error looks
+        # clean, but this manual clearing should be done automatically
+        terminal.write.raw('')
         raise RuntimeError('All nodes failed to connect. Cannot run any checks')
     else:
         loader.write('Collection completed!' + ' ' *70 + '\n')
