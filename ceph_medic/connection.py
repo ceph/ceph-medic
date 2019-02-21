@@ -22,18 +22,23 @@ def get_connection(hostname, username=None, threads=5, use_sudo=None, detect_sud
     if ceph_medic.config.get('ssh_config'):
         hostname = "-F %s %s" % (ceph_medic.config.get('ssh_config'), hostname)
     try:
-
-        conn = remoto.Connection(
-            hostname,
-            logger=remote_logger,
-            threads=threads,
-            detect_sudo=detect_sudo,
-        )
+        deployment_type = ceph_medic.config.get('deployment_type', 'ssh')
+        conn_obj = remoto.connection.get(deployment_type)
+        # TODO: generalize this out of here
+        if deployment_type in ['k8s', 'kubernetes']:
+            namespace = ceph_medic.config['file'].get_safe('kubernetes', 'namespace', 'rook-ceph')
+            conn = conn_obj(hostname, namespace)
+        elif deployment_type in ['ssh', 'baremetal']:
+            conn = conn_obj(
+                hostname,
+                logger=remote_logger,
+                threads=threads,
+                detect_sudo=detect_sudo,
+            )
 
         # Set a timeout value in seconds to disconnect and move on
         # if no data is sent back.
         conn.global_timeout = 300
-
         # XXX put this somewhere else
         if not ceph_medic.config['cluster_name']:
             cluster_conf_files, stderr, exit_code = remoto.process.check(conn, ['ls', '/etc/ceph/'])
@@ -54,6 +59,16 @@ def get_connection(hostname, username=None, threads=5, use_sudo=None, detect_sud
         logger.error(msg)
         logger.error(errors)
         raise error
+
+
+def as_bytes(string):
+    """
+    Ensure that whatever type of string is incoming, it is returned as bytes,
+    encoding to utf-8 otherwise
+    """
+    if isinstance(string, bytes):
+        return string
+    return string.encode('utf-8', errors='ignore')
 
 
 def get_local_connection(logger, use_sudo=False):
