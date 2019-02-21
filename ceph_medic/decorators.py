@@ -1,3 +1,4 @@
+import os
 import sys
 from ceph_medic import terminal
 from functools import wraps
@@ -44,6 +45,8 @@ def catches(catch=None, handler=None, exit=True):
             try:
                 return f(*a, **kw)
             except catch as e:
+                if os.environ.get('CEPH_MEDIC_DEBUG'):
+                    raise
                 if handler:
                     return handler(e)
                 else:
