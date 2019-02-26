@@ -8,7 +8,6 @@ import remoto
 from execnet.gateway_bootstrap import HostNotFound
 import ceph_medic
 from ceph_medic.decorators import catches
-from ceph_medic.generate import generate_inventory
 from ceph_medic.util import configuration
 from ceph_medic import terminal
 
@@ -127,7 +126,11 @@ Global Options:
             ceph_medic.config['nodes'] = k8s_hosts
             ceph_medic.config['hosts_file'] = ':memory:'
             self.hosts_file = ':memory:'
-
+        elif ceph_medic.config['file'].get_safe('global', 'deployment_type') == 'openshift':
+            k8s_hosts = generate_k8s_hosts()
+            ceph_medic.config['nodes'] = k8s_hosts
+            ceph_medic.config['hosts_file'] = ':memory:'
+            self.hosts_file = ':memory:'
         else:
             # Hosts file
             self.hosts_file = parser.get('--inventory', configuration.get_host_file())
@@ -154,10 +157,26 @@ Global Options:
 
 
 # TODO: get this out of here, generalize, cleanup
-def generate_k8s_hosts():
-    namespace = ceph_medic.config['file'].get_safe('kubernetes', 'namespace', 'rook-ceph')
+def generate_k8s_hosts(backend='openshift'):
     local_conn = remoto.connection.get('local')()
-    cmd = ['kubectl', '--request-timeout=5', '-n', namespace, 'get', 'pods', '-o', 'json']
+
+    if backend == 'kubernetes':
+        namespace = ceph_medic.config['file'].get_safe('kubernetes', 'namespace', 'rook-ceph')
+        context = ceph_medic.config['file'].get_safe('kubernetes', 'context', None)
+        if context:
+            cmd = ['kubectl', '--context', context]
+        else:
+            cmd = ['kubectl']
+        cmd.extend(['--request-timeout=5', '-n', namespace, 'get', 'pods', '-o', 'json'])
+    else:
+        namespace = ceph_medic.config['file'].get_safe('openshift', 'namespace', 'rook-ceph')
+        context = ceph_medic.config['file'].get_safe('openshift', 'context', None)
+        if context:
+            cmd = ['oc', '--context', context]
+        else:
+            cmd = ['oc']
+        cmd.extend(['--request-timeout=5', 'get', '-n', namespace, 'pods', '-o', 'json'])
+
     out, err, code = remoto.process.check(local_conn, cmd)
     if code:
         terminal.error('Unable to retrieve the pods via kubectl using command: %s' % ' '.join(cmd))
