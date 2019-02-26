@@ -2,6 +2,7 @@ import logging
 import socket
 import remoto
 import ceph_medic
+from execnet.gateway_bootstrap import HostNotFound
 
 logger = logging.getLogger(__name__)
 
@@ -25,9 +26,19 @@ def get_connection(hostname, username=None, threads=5, use_sudo=None, detect_sud
         deployment_type = ceph_medic.config.get('deployment_type', 'ssh')
         conn_obj = remoto.connection.get(deployment_type)
         # TODO: generalize this out of here
+        # XXX this is egregious
         if deployment_type in ['k8s', 'kubernetes']:
             namespace = ceph_medic.config['file'].get_safe('kubernetes', 'namespace', 'rook-ceph')
             conn = conn_obj(hostname, namespace)
+            # check if conn is ok
+            remoto.process.check(conn, ['whoami'])
+        elif deployment_type in ['oc', 'openshift']:
+            namespace = ceph_medic.config['file'].get_safe('kubernetes', 'namespace', 'rook-ceph')
+            conn = conn_obj(hostname, namespace)
+            # check if conn is ok
+            stdout, stderr, code = remoto.process.check(conn, ['whoami'])
+            if code:
+                raise HostNotFound('Remote connection failed while testing connection: %s' % stderr)
         elif deployment_type in ['ssh', 'baremetal']:
             conn = conn_obj(
                 hostname,
@@ -35,7 +46,6 @@ def get_connection(hostname, username=None, threads=5, use_sudo=None, detect_sud
                 threads=threads,
                 detect_sudo=detect_sudo,
             )
-
         # Set a timeout value in seconds to disconnect and move on
         # if no data is sent back.
         conn.global_timeout = 300
