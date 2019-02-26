@@ -91,6 +91,7 @@ class ReleaseCommand(Command):
         print(' '.join(cmd))
         subprocess.check_call(cmd)
 
+
 setup(
     name='ceph-medic',
     version=version,
@@ -108,7 +109,7 @@ setup(
     install_requires=[
         'execnet',
         'tambo',
-        'remoto',
+        'remoto>=1.1.0',
     ] + install_requires,
 
     tests_require=[
