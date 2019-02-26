@@ -56,8 +56,14 @@ def stat_path(path, skip_dirs=None, skip_files=None, get_contents=False):
             metadata[attr] = value
 
     # translate the owner and group:
-    metadata[u'owner'] = decoded(pwd.getpwuid(stat_info.st_uid)[0])
-    metadata[u'group'] = decoded(grp.getgrgid(stat_info.st_gid)[0])
+    try:
+        metadata[u'owner'] = decoded(pwd.getpwuid(stat_info.st_uid)[0])
+    except KeyError:
+        metadata[u'owner'] = stat_info.st_uid
+    try:
+        metadata[u'group'] = decoded(grp.getgrgid(stat_info.st_gid)[0])
+    except KeyError:
+        metadata[u'group'] = stat_info.st_gid
 
     return metadata
 
