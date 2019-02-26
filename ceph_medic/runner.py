@@ -1,6 +1,7 @@
 import logging
 from ceph_medic import metadata, terminal, daemon_types
 from ceph_medic import checks, __version__
+from ceph_medic import config
 
 logger = logging.getLogger(__name__)
 
@@ -115,7 +116,8 @@ def report(results):
 
 start_header_tmpl = """
 {title:=^80}
-Version: {version: >4}    Cluster Name: "{cluster_name}"
+Version:    {version: >4}    Cluster Name: "{cluster_name}"
+Connection: {connection_type}
 Total hosts: [{total_hosts}]
 OSDs: {osds: >4}    MONs: {mons: >4}     Clients: {clients: >4}
 MDSs: {mdss: >4}    RGWs: {rgws: >4}     MGRs: {mgrs: >7}
@@ -123,6 +125,7 @@ MDSs: {mdss: >4}    RGWs: {rgws: >4}     MGRs: {mgrs: >7}
 
 
 def start_header():
+    connection_type = config['file'].get_safe('global', 'deployment_type', 'ssh')
     daemon_totals = dict((daemon, 0) for daemon in daemon_types)
     total_hosts = 0
     for daemon in daemon_types:
@@ -132,6 +135,7 @@ def start_header():
     terminal.write.raw(start_header_tmpl.format(
         title='  Starting remote check session  ',
         version=__version__,
+        connection_type=connection_type,
         total_hosts=total_hosts,
         cluster_name=metadata['cluster_name'],
         **daemon_totals))
