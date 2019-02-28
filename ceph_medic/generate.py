@@ -1,3 +1,4 @@
+from __future__ import print_function
 import sys
 import ceph_medic
 from ceph_medic.connection import get_connection
@@ -27,7 +28,7 @@ def generate_inventory(inventory, to_stdout=False, tmp_dir=None):
     result_str = "\n".join(result) + "\n"
     # if not None the NamedTemporaryFile will be created in the given directory
     if to_stdout:
-        print result_str
+        print(result_str)
         return
     with open('hosts_file', 'w') as hosts_file:
         hosts_file.write(result_str)
@@ -44,7 +45,7 @@ def get_mon_report(conn):
 
     if code > 0:
         for line in err:
-            print line
+            print(line)
 
     try:
         return json.loads(b''.join(out).decode('utf-8'))

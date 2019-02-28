@@ -20,6 +20,13 @@ def capture_exception(error):
     return details
 
 
+def decoded(string):
+    try:
+        return string.decode('utf-8')
+    except AttributeError:
+        return string
+
+
 # Paths
 #
 def stat_path(path, skip_dirs=None, skip_files=None, get_contents=False):
@@ -31,24 +38,32 @@ def stat_path(path, skip_dirs=None, skip_files=None, get_contents=False):
     # .. note:: Neither ``skip_dirs`` nor ``skip_files`` is used here, but the
     # remote execution of functions use name-based arguments which does not allow
     # the use of ``**kw``
-
-    metadata = {'exception': {}}
+    metadata = {u'exception': {}}
+    path = decoded(path)
     try:
         stat_info = os.stat(path)
         if get_contents and os.path.isfile(path):
             with open(path, 'r') as opened_file:
-                metadata['contents'] = opened_file.read()
+                metadata[u'contents'] = decoded(opened_file.read())
     except Exception as error:
         return {'exception': capture_exception(error)}
 
     # get all the stat results back into the metadata
     for attr in dir(stat_info):
+        attr = decoded(attr)
         if not attr.startswith('__'):
-            metadata[attr] = getattr(stat_info, attr)
+            value = decoded(getattr(stat_info, attr))
+            metadata[attr] = value
 
     # translate the owner and group:
-    metadata['owner'] = pwd.getpwuid(stat_info.st_uid)[0]
-    metadata['group'] = grp.getgrgid(stat_info.st_gid)[0]
+    try:
+        metadata[u'owner'] = decoded(pwd.getpwuid(stat_info.st_uid)[0])
+    except KeyError:
+        metadata[u'owner'] = stat_info.st_uid
+    try:
+        metadata[u'group'] = decoded(grp.getgrgid(stat_info.st_gid)[0])
+    except KeyError:
+        metadata[u'group'] = stat_info.st_gid
 
     return metadata
 
@@ -68,7 +83,10 @@ def path_tree(path, skip_dirs=None, skip_files=None, get_contents=None):
 
     # .. note:: ``get_contents`` is not used here, but the remote execution of functions
     # use name-based arguments which does not allow the use of ``**kw``
-
+    try:
+        path = path.decode('utf-8')
+    except AttributeError:
+        pass
     skip_files = skip_files or []
     skip_dirs = skip_dirs or []
     files = []
@@ -87,7 +105,11 @@ def path_tree(path, skip_dirs=None, skip_files=None, get_contents=None):
             absolute_path = os.path.join(root, _dir)
             dirs.append(absolute_path)
 
-    return dict(path=path, dirs=dirs, files=files)
+    # using the 'u' prefix forces python3<->python2 compatibility otherwise the
+    # keys would be bytes, regardless if input is a str which should've forced
+    # a 'str' behavior. The prefix is invalid syntax for Python 3.0 to 3.2, so
+    # this will be valid in Python 3.3 and newer and Python 2
+    return {u'path': path, u'dirs': dirs, u'files': files}
 
 
 def which(executable):

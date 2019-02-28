@@ -183,15 +183,23 @@ def collect():
                 loader.write('Host: %-20s  connection: [%-20s]' % (hostname, terminal.red('failed')))
                 loader.write('\n')
                 failed_nodes += 1
+                if metadata[node_type].get(hostname):
+                    metadata[node_type].pop(hostname)
+                metadata['nodes'][node_type] = [i for i in metadata['nodes'][node_type] if i['host'] != hostname]
                 continue
 
             # send the full node metadata for global scope so that the checks
             # can consume this
-            metadata[node_type][node['host']] = get_node_metadata(conn, hostname, cluster_nodes)
+            metadata[node_type][hostname] = get_node_metadata(conn, hostname, cluster_nodes)
             conn.exit()
     if failed_nodes == total_nodes:
-        loader.write(terminal.red('Collection failed!') + ' ' *70 + '\n')
+        loader.write(terminal.red('Collection failed!') + ' ' *70)
+        # TODO: this helps clear out the 'loader' line so that the error looks
+        # clean, but this manual clearing should be done automatically
+        terminal.write.raw('')
         raise RuntimeError('All nodes failed to connect. Cannot run any checks')
+    if failed_nodes:
+        loader.write('Collection completed with some failed connections' + ' ' *70 + '\n')
     else:
         loader.write('Collection completed!' + ' ' *70 + '\n')
 

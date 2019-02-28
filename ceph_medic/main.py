@@ -1,8 +1,10 @@
 from ceph_medic import check, log
+import json
 import sys
 import os
 from textwrap import dedent
 from tambo import Transport
+import remoto
 from execnet.gateway_bootstrap import HostNotFound
 import ceph_medic
 from ceph_medic.decorators import catches
@@ -103,6 +105,7 @@ Global Options:
         log.setup(loaded_config)
         # update the module-wide configuration object
         ceph_medic.config.update(configuration.get_overrides(loaded_config))
+        ceph_medic.config['file'] = loaded_config
 
         # SSH config
         ceph_medic.config['ssh_config'] = parser.get('--ssh-config')
@@ -115,18 +118,32 @@ Global Options:
         ceph_medic.config['cluster_name'] = parser.get('--cluster')
         ceph_medic.metadata['cluster_name'] = 'ceph'
 
-        # Hosts file
-        self.hosts_file = parser.get('--inventory', configuration.get_host_file())
+        # XXX Can't be if/else through all the connections possible here,
+        # generlize, get a helper, cleanup
+        # Deployment Type
+        if ceph_medic.config['file'].get_safe('global', 'deployment_type') == 'kubernetes':
+            k8s_hosts = generate_k8s_hosts()
+            ceph_medic.config['nodes'] = k8s_hosts
+            ceph_medic.config['hosts_file'] = ':memory:'
+            self.hosts_file = ':memory:'
+        elif ceph_medic.config['file'].get_safe('global', 'deployment_type') == 'openshift':
+            k8s_hosts = generate_k8s_hosts()
+            ceph_medic.config['nodes'] = k8s_hosts
+            ceph_medic.config['hosts_file'] = ':memory:'
+            self.hosts_file = ':memory:'
+        else:
+            # Hosts file
+            self.hosts_file = parser.get('--inventory', configuration.get_host_file())
 
-        # find the hosts files, by the CLI first, fallback to the configuration
-        # file, and lastly if none of those are found or defined, try to load
-        # from well known locations (cwd, and /etc/ansible/)
-        loaded_hosts = configuration.load_hosts(
-            parser.get('--inventory',
-                       ceph_medic.config.get('--inventory', self.hosts_file)))
-        ceph_medic.config['nodes'] = loaded_hosts.nodes
-        ceph_medic.config['hosts_file'] = loaded_hosts.filename
-        self.hosts_file = loaded_hosts.filename
+            # find the hosts files, by the CLI first, fallback to the configuration
+            # file, and lastly if none of those are found or defined, try to load
+            # from well known locations (cwd, and /etc/ansible/)
+            loaded_hosts = configuration.load_hosts(
+                parser.get('--inventory',
+                           ceph_medic.config.get('--inventory', self.hosts_file)))
+            ceph_medic.config['nodes'] = loaded_hosts.nodes
+            ceph_medic.config['hosts_file'] = loaded_hosts.filename
+            self.hosts_file = loaded_hosts.filename
 
         parser.catch_version = ceph_medic.__version__
         parser.mapper = self.mapper
@@ -137,3 +154,56 @@ Global Options:
         parser.dispatch()
         parser.catches_help()
         parser.catches_version()
+
+
+# TODO: get this out of here, generalize, cleanup
+def generate_k8s_hosts(backend='openshift'):
+    local_conn = remoto.connection.get('local')()
+
+    if backend == 'kubernetes':
+        namespace = ceph_medic.config['file'].get_safe('kubernetes', 'namespace', 'rook-ceph')
+        context = ceph_medic.config['file'].get_safe('kubernetes', 'context', None)
+        if context:
+            cmd = ['kubectl', '--context', context]
+        else:
+            cmd = ['kubectl']
+        cmd.extend(['--request-timeout=5', '-n', namespace, 'get', 'pods', '-o', 'json'])
+    else:
+        namespace = ceph_medic.config['file'].get_safe('openshift', 'namespace', 'rook-ceph')
+        context = ceph_medic.config['file'].get_safe('openshift', 'context', None)
+        if context:
+            cmd = ['oc', '--context', context]
+        else:
+            cmd = ['oc']
+        cmd.extend(['--request-timeout=5', 'get', '-n', namespace, 'pods', '-o', 'json'])
+
+    out, err, code = remoto.process.check(local_conn, cmd)
+    if code:
+        terminal.error('Unable to retrieve the pods via kubectl using command: %s' % ' '.join(cmd))
+        raise SystemExit('\n'.join(err))
+    pods = json.loads(''.join(out))
+    base_inventory = {
+        'rgws': [], 'mgrs': [], 'mdss': [], 'clients': [], 'osds': [], 'mons': []
+    }
+    label_map = {
+        'rook-ceph-mgr': 'mgrs',
+        'rook-ceph-mon': 'mons',
+        'rook-ceph-osd': 'osds',
+        'rook-ceph-mds': 'mdss',
+        'rook-ceph-rgw': 'rgws',
+        'rook-ceph-client': 'clients',
+    }
+
+    for item in pods['items']:
+        label_name = item['metadata'].get('labels', {}).get('app')
+        if not label_name:
+            continue
+        if label_name in label_map:
+            inventory_key = label_map[label_name]
+            base_inventory[inventory_key].append(
+                {'host': item['metadata']['name'], 'group': None}
+            )
+    for key, value in dict(base_inventory).items():
+        if not value:
+            base_inventory.pop(key)
+    return base_inventory

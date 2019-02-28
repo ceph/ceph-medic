@@ -38,6 +38,9 @@ medic_conf_template = """
 # Should always be an absolute path, although '.' is allowed to log from
 # wherever the CLI is executed from (current working directory)
 --log-path = .
+# What type of deployment is the cluster using? Valid values are:
+# baremetal, container, openshift, kubernetes
+# deployment_type = baremetal
 
 [check]
 # Overrides for some of ceph-medic's check flags, like what errors or warnings
@@ -45,6 +48,11 @@ medic_conf_template = """
 # should be comma separated into their respective codes.
 # --ignore = ECOMM101,ECOMM102
 
+[baremetal]
+# baremetal options
+
+[kubernetes]
+namespace = rook-ceph
 """
 
 
