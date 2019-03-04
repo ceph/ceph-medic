@@ -125,7 +125,7 @@ MDSs: {mdss: >4}    RGWs: {rgws: >4}     MGRs: {mgrs: >7}
 
 
 def start_header():
-    connection_type = config['file'].get_safe('global', 'deployment_type', 'ssh')
+    connection_type = config.file.get_safe('global', 'deployment_type', 'ssh')
     daemon_totals = dict((daemon, 0) for daemon in daemon_types)
     total_hosts = 0
     for daemon in daemon_types:
