@@ -100,3 +100,79 @@ def make_nodes():
             data[daemon] = [dict(host=node_name) for node_name in node_names]
         return data
     return make_data
+
+
+class Capture(object):
+
+    def __init__(self, *a, **kw):
+        self.a = a
+        self.kw = kw
+        self.calls = []
+        self.return_values = kw.get('return_values', False)
+        self.always_returns = kw.get('always_returns', False)
+
+    def __call__(self, *a, **kw):
+        self.calls.append({'args': a, 'kwargs': kw})
+        if self.always_returns:
+            return self.always_returns
+        if self.return_values:
+            return self.return_values.pop()
+
+
+class Factory(object):
+
+    def __init__(self, **kw):
+        for k, v in kw.items():
+            setattr(self, k, v)
+
+
+@pytest.fixture
+def factory():
+    return Factory
+
+
+@pytest.fixture
+def capture():
+    return Capture()
+
+
+@pytest.fixture
+def fake_run(monkeypatch):
+    fake_run = Capture()
+    monkeypatch.setattr('remoto.process.run', fake_run)
+    return fake_run
+
+
+@pytest.fixture
+def fake_check(monkeypatch):
+    fake_call = Capture(always_returns=([], [], 0))
+    monkeypatch.setattr('remoto.process.check', fake_call)
+    return fake_call
+
+
+@pytest.fixture
+def stub_check(monkeypatch):
+    """
+    Monkeypatches process.check, so that a caller can add behavior to the
+    response
+    """
+    def apply(return_values):
+        if isinstance(return_values, tuple):
+            return_values = [return_values]
+        stubbed_call = Capture(return_values=return_values)
+        monkeypatch.setattr('remoto.process.check', stubbed_call)
+        return stubbed_call
+
+    return apply
+
+
+@pytest.fixture(autouse=True)
+def reset_file_config(request, monkeypatch):
+    """
+    The globally available ``ceph_medic.config.file`` might get mangled in
+    tests, make sure that after evert test, it gets reset, preventing pollution
+    going into other tests later.
+    """
+    def fin():
+        ceph_medic.config.file = ceph_medic.UnloadedConfig()
+    request.addfinalizer(fin)
