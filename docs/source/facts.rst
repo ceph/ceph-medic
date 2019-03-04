@@ -22,8 +22,9 @@ like for example a full list of all hosts discovered::
 
 
 Each host has distinct metadata that gets collected. If any errors are
-detected, the ``exception`` key is set populated with all information regarding to the error generated when trying to execute the call.
-For example a failure on a call to ``stat`` on a path might be::
+detected, the ``exception`` key is set populated with all information regarding
+to the error generated when trying to execute the call.  For example a failure
+on a call to ``stat`` on a path might be::
 
     'osd': {
         'node1': {
