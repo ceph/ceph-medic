@@ -8,7 +8,7 @@ class UnloadedConfig(object):
     a nice error message when values from the config are used.
     """
     def __getattr__(self, *a):
-        raise RuntimeError("No valid ceph configuration file was loaded.")
+        raise RuntimeError("No valid ceph-medic configuration file was loaded.")
 
 
 config = namedtuple('config', ['verbosity', 'nodes', 'hosts_file', 'file'])
