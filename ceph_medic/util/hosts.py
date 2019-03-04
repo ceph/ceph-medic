@@ -4,8 +4,12 @@ from remoto import connection, process
 
 
 def _platform_options(platform):
-    namespace = config.file.get_safe(platform, 'namespace', 'rook-ceph')
-    context = config.file.get_safe(platform, 'context', None)
+    try:
+        namespace = config.file.get_safe(platform, 'namespace', 'rook-ceph')
+        context = config.file.get_safe(platform, 'context', None)
+    except RuntimeError:
+        namespace = 'rook-ceph'
+        context = None
     return {'namespace': namespace, 'context': context}
 
 
@@ -26,7 +30,7 @@ def container_platform(platform='openshift'):
     else:
         cmd = [executable]
 
-        cmd.extend(['--request-timeout=5', 'get', '-n', namespace, 'pods', '-o', 'json'])
+    cmd.extend(['--request-timeout=5', 'get', '-n', namespace, 'pods', '-o', 'json'])
 
     out, err, code = process.check(local_conn, cmd)
     if code:
@@ -45,7 +49,7 @@ def container_platform(platform='openshift'):
         'rook-ceph-client': 'clients',
     }
 
-    for item in pods['items']:
+    for item in pods.get('items', {}):
         label_name = item['metadata'].get('labels', {}).get('app')
         if not label_name:
             continue
