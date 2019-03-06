@@ -16,7 +16,7 @@ class UnloadedConfig(object):
 
 config = namedtuple('config', ['verbosity', 'nodes', 'hosts_file', 'file'])
 config.file = UnloadedConfig("No valid ceph-medic configuration file was loaded")
-config.nodes = UnloadedConfig("No hosts are available or configured")
+config.nodes = {}
 
 metadata = {'rgws': {}, 'mgrs': {}, 'mdss': {}, 'clients': {}, 'osds': {}, 'mons': {}, 'nodes': {}}
 
