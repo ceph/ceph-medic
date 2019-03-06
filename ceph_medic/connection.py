@@ -20,10 +20,10 @@ def get_connection(hostname, username=None, threads=5, use_sudo=None, detect_sud
     if username:
         hostname = "%s@%s" % (username, hostname)
 
-    if ceph_medic.config.get('ssh_config'):
+    if ceph_medic.config.ssh_config:
         hostname = "-F %s %s" % (ceph_medic.config.get('ssh_config'), hostname)
     try:
-        deployment_type = ceph_medic.config.get('deployment_type', 'ssh')
+        deployment_type = ceph_medic.config.file.get_safe('global', 'deployment_type', 'baremetal')
         conn_obj = remoto.connection.get(deployment_type)
         if deployment_type in ['k8s', 'kubernetes', 'openshift', 'oc']:
             conn = container_platform_conn(hostname, conn_obj, deployment_type)
@@ -42,7 +42,7 @@ def get_connection(hostname, username=None, threads=5, use_sudo=None, detect_sud
         # if no data is sent back.
         conn.global_timeout = 300
         # XXX put this somewhere else
-        if not ceph_medic.config['cluster_name']:
+        if not ceph_medic.config.cluster_name:
             cluster_conf_files, stderr, exit_code = remoto.process.check(conn, ['ls', '/etc/ceph/'])
             cluster_name = 'ceph'
             if 'ceph.conf' not in cluster_conf_files:
@@ -53,7 +53,7 @@ def get_connection(hostname, username=None, threads=5, use_sudo=None, detect_sud
                         logger.warning('inferred %s as the cluster name', cluster_name)
             ceph_medic.metadata['cluster_name'] = cluster_name
         else:
-            ceph_medic.metadata['cluster_name'] = ceph_medic.config['cluster_name']
+            ceph_medic.metadata['cluster_name'] = ceph_medic.config.cluster_name
         return conn
     except Exception as error:
         msg = "connecting to host: %s " % hostname
