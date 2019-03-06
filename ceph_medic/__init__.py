@@ -7,12 +7,16 @@ class UnloadedConfig(object):
     a configuration file is not successfully loaded then it will give
     a nice error message when values from the config are used.
     """
+    def __init__(self, error=None):
+        self.error = error
+
     def __getattr__(self, *a):
-        raise RuntimeError("No valid ceph-medic configuration file was loaded.")
+        raise RuntimeError(self.error)
 
 
 config = namedtuple('config', ['verbosity', 'nodes', 'hosts_file', 'file'])
-config.file = UnloadedConfig()
+config.file = UnloadedConfig("No valid ceph-medic configuration file was loaded")
+config.nodes = UnloadedConfig("No hosts are available or configured")
 
 metadata = {'rgws': {}, 'mgrs': {}, 'mdss': {}, 'clients': {}, 'osds': {}, 'mons': {}, 'nodes': {}}
 
