@@ -32,10 +32,12 @@ def container_platform(platform='openshift'):
 
     cmd.extend(['--request-timeout=5', 'get', '-n', namespace, 'pods', '-o', 'json'])
 
-    out, err, code = process.check(local_conn, cmd)
-    if code:
+    try:
+        out, err, code = process.check(local_conn, cmd)
+    except RuntimeError:
+        out = "{}"
         terminal.error('Unable to retrieve the pods using command: %s' % ' '.join(cmd))
-        raise SystemExit('\n'.join(err))
+
     pods = json.loads(''.join(out))
     base_inventory = {
         'rgws': [], 'mgrs': [], 'mdss': [], 'clients': [], 'osds': [], 'mons': []
