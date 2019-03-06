@@ -1,39 +1,31 @@
-import pytest
 from ceph_medic.util import hosts, configuration
 import ceph_medic
 from textwrap import dedent
 
 
+def failed_check():
+    raise RuntimeError('command failed')
+
+
 class TestContainerPlatform(object):
 
-    def test_unable_to_retrieve_pods(self, stub_check):
-        stub_check(([], ['error from command'], 1))
-
-        with pytest.raises(SystemExit) as error:
-            hosts.container_platform()
-
-        assert str(error.value) == 'error from command'
-
-    def test_oc_executable_fails(self, stub_check, capsys):
-        stub_check((['{"items": {}}'], [], 1))
-        with pytest.raises(SystemExit):
-            hosts.container_platform()
+    def test_oc_executable_fails(self, monkeypatch, capsys):
+        monkeypatch.setattr(hosts.process, 'check', lambda *a: failed_check())
+        hosts.container_platform()
         stdout, stderr = capsys.readouterr()
         assert 'Unable to retrieve the pods using command' in stdout
         assert 'oc --request-timeout=5 get -n rook-ceph pods -o json' in stdout
 
-    def test_kubectl_executable_fails(self, stub_check, capsys):
-        stub_check((['{"items": {}}'], [], 1))
-        with pytest.raises(SystemExit):
-            hosts.container_platform('kubernetes')
+    def test_kubectl_executable_fails(self, monkeypatch, capsys):
+        monkeypatch.setattr(hosts.process, 'check', lambda *a: failed_check())
+        hosts.container_platform('kubernetes')
         stdout, stderr = capsys.readouterr()
         assert 'Unable to retrieve the pods using command' in stdout
         assert 'kubectl --request-timeout=5 get -n rook-ceph pods -o json' in stdout
 
     def test_no_context(self, stub_check):
         check = stub_check((['{"items": {}}'], [], 1))
-        with pytest.raises(SystemExit):
-            hosts.container_platform('kubernetes')
+        hosts.container_platform('kubernetes')
         command = check.calls[0]['args'][1]
         assert command == [
             'kubectl', '--request-timeout=5', 'get', '-n',
@@ -48,8 +40,7 @@ class TestContainerPlatform(object):
         conf = configuration.load_string(contents)
         ceph_medic.config.file = conf
         check = stub_check((['{"items": {}}'], [], 1))
-        with pytest.raises(SystemExit):
-            hosts.container_platform('kubernetes')
+        hosts.container_platform('kubernetes')
         command = check.calls[0]['args'][1]
         assert command == [
             'kubectl', '--context', '87', '--request-timeout=5', 'get', '-n',
@@ -64,8 +55,7 @@ class TestContainerPlatform(object):
         conf = configuration.load_string(contents)
         ceph_medic.config.file = conf
         check = stub_check((['{"items": {}}'], [], 1))
-        with pytest.raises(SystemExit):
-            hosts.container_platform()
+        hosts.container_platform()
         command = check.calls[0]['args'][1]
         assert command == [
             'oc', '--context', '87', '--request-timeout=5', 'get', '-n',
