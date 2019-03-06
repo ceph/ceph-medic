@@ -48,10 +48,16 @@ def stat_path(path, skip_dirs=None, skip_files=None, get_contents=False):
     except Exception as error:
         return {'exception': capture_exception(error)}
 
+    allowed_attrs = [
+        'n_fields', 'n_sequence_fields', 'n_unnamed_fields', 'st_atime',
+        'st_blksize', 'st_blocks', 'st_ctime', 'st_dev', 'st_gid', 'st_ino',
+        'st_mode', 'st_mtime', 'st_nlink', 'st_rdev', 'st_size', 'st_uid'
+    ]
+
     # get all the stat results back into the metadata
     for attr in dir(stat_info):
         attr = decoded(attr)
-        if not attr.startswith('__'):
+        if attr in allowed_attrs:
             value = decoded(getattr(stat_info, attr))
             metadata[attr] = value
 
