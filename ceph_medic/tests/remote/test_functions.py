@@ -50,7 +50,12 @@ class TestStatPath(object):
 
     def test_stat_dir(self, tmpdir):
         result = functions.stat_path(str(tmpdir))
-        assert result
+        assert result != {}
+
+    def test_no_callables(self, tmpdir):
+        result = functions.stat_path(str(tmpdir))
+        for value in result.values():
+            assert callable(value) is False
 
 
 class TestPathTree(object):
