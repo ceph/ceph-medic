@@ -120,26 +120,26 @@ def get_node_metadata(conn, hostname, cluster_nodes):
     node_metadata = {'ceph': {}}
 
     # collect paths and files first
-    loader.write('Host: %-*s  collecting: [%s]' % (20, hostname, terminal.yellow('paths')))
+    loader.write('Host: %-*s  collecting: [%s]' % (40, hostname, terminal.yellow('paths')))
     node_metadata['paths'] = collect_paths(conn)
-    loader.write('Host: %-*s  collecting: [%s]' % (20, hostname, terminal.green('paths')))
+    loader.write('Host: %-*s  collecting: [%s]' % (40, hostname, terminal.green('paths')))
 
     # TODO: collect network information, passing all the cluster_nodes
     # so that it can check for inter-node connectivity
-    loader.write('Host: %-*s  collecting: [%s]' % (20, hostname, terminal.yellow('network')))
+    loader.write('Host: %-*s  collecting: [%s]' % (40, hostname, terminal.yellow('network')))
     node_metadata['network'] = collect_network(cluster_nodes)
-    loader.write('Host: %-*s  collecting: [%s]' % (20, hostname, terminal.green('network')))
+    loader.write('Host: %-*s  collecting: [%s]' % (40, hostname, terminal.green('network')))
 
     # TODO: collect device information
-    loader.write('Host: %-*s  collecting: [%s]' % (20, hostname, terminal.yellow('devices')))
+    loader.write('Host: %-*s  collecting: [%s]' % (40, hostname, terminal.yellow('devices')))
     node_metadata['devices'] = collect_devices()
-    loader.write('Host: %-*s  collecting: [%s]' % (20, hostname, terminal.green('devices')))
+    loader.write('Host: %-*s  collecting: [%s]' % (40, hostname, terminal.green('devices')))
 
     # collect ceph information
-    loader.write('Host: %-*s  collecting: [%s]' % (20, hostname, terminal.yellow('ceph information')))
+    loader.write('Host: %-*s  collecting: [%s]' % (40, hostname, terminal.yellow('ceph information')))
     node_metadata['ceph'] = collect_ceph_info(conn)
     node_metadata['ceph']['sockets'] = collect_socket_info(conn, node_metadata)
-    loader.write('Host: %-*s  collecting: [%s]' % (20, hostname, terminal.green('ceph information')))
+    loader.write('Host: %-*s  collecting: [%s]' % (40, hostname, terminal.green('ceph information')))
 
     return node_metadata
 
@@ -169,23 +169,24 @@ def collect():
 
             total_nodes += 1
             hostname = node['host']
-            loader.write('Host: %-20s  connection: [%-20s]' % (hostname, terminal.yellow('connecting')))
+            loader.write('Host: %-40s  connection: [%-20s]' % (hostname, terminal.yellow('connecting')))
             # TODO: make sure that the hostname is resolvable, trying to
             # debug SSH issues with execnet is pretty hard/impossible, use
             # util.net.host_is_resolvable
             try:
                 logger.debug('attempting connection to host: %s', node['host'])
                 conn = get_connection(node['host'])
-                loader.write('Host: %-20s  connection: [%-20s]' % (hostname, terminal.green('connected')))
+                loader.write('Host: %-40s  connection: [%-20s]' % (hostname, terminal.green('connected')))
                 loader.write('\n')
-            except HostNotFound:
+            except HostNotFound as err:
                 logger.exception('connection failed')
-                loader.write('Host: %-20s  connection: [%-20s]' % (hostname, terminal.red('failed')))
+                loader.write('Host: %-40s  connection: [%-20s]' % (hostname, terminal.red('failed')))
                 loader.write('\n')
                 failed_nodes += 1
                 if metadata[node_type].get(hostname):
                     metadata[node_type].pop(hostname)
                 metadata['nodes'][node_type] = [i for i in metadata['nodes'][node_type] if i['host'] != hostname]
+                metadata['failed_nodes'].update({hostname: str(err)})
                 continue
 
             # send the full node metadata for global scope so that the checks
@@ -199,7 +200,7 @@ def collect():
         terminal.write.raw('')
         raise RuntimeError('All nodes failed to connect. Cannot run any checks')
     if failed_nodes:
-        loader.write('Collection completed with some failed connections' + ' ' *70 + '\n')
+        loader.write(terminal.yellow('Collection completed with some failed connections' + ' ' *70 + '\n'))
     else:
         loader.write('Collection completed!' + ' ' *70 + '\n')
 
