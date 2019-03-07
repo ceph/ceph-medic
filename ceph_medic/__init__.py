@@ -18,7 +18,7 @@ config = namedtuple('config', ['verbosity', 'nodes', 'hosts_file', 'file'])
 config.file = UnloadedConfig("No valid ceph-medic configuration file was loaded")
 config.nodes = {}
 
-metadata = {'rgws': {}, 'mgrs': {}, 'mdss': {}, 'clients': {}, 'osds': {}, 'mons': {}, 'nodes': {}}
+metadata = {'failed_nodes': {}, 'rgws': {}, 'mgrs': {}, 'mdss': {}, 'clients': {}, 'osds': {}, 'mons': {}, 'nodes': {}}
 
 daemon_types = [i for i in metadata.keys() if i != 'nodes']
 
