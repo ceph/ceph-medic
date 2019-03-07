@@ -38,6 +38,12 @@ def container_platform(platform='openshift'):
         out = "{}"
         terminal.error('Unable to retrieve the pods using command: %s' % ' '.join(cmd))
 
+    if code:
+        out = "{}"
+        output = out + err
+        for line in output:
+            terminal.error(line)
+
     pods = json.loads(''.join(out))
     base_inventory = {
         'rgws': [], 'mgrs': [], 'mdss': [], 'clients': [], 'osds': [], 'mons': []
