@@ -33,12 +33,26 @@ class Runner(object):
         start_header()
         for daemon_type in daemon_types:
             self.run_daemons(daemon_type)
+        if metadata['failed_nodes']:
+            terminal.write.bold('\n{daemon:-^30}\n'.format(daemon=' Failed Nodes '))
+            for host, reason in metadata['failed_nodes'].items():
+                terminal.loader.write(' %s' % terminal.red(host))
+                terminal.write.write('\n')
+                reason_lines = reason.split('\n')
+                main_reason = reason_lines.pop(0)
+                terminal.write.write("  %s\n" % main_reason)
+                for line in reason_lines:
+                    terminal.write.write("   %s\n" % line)
         self.total = self.failed + self.passed
         return self
 
     def run_daemons(self, daemon_type):
-        if metadata[daemon_type]:  # we have nodes of this type to run
+        has_nodes = metadata[daemon_type]
+        is_daemon = daemon_type in metadata['nodes']
+        if has_nodes and is_daemon:  # we have nodes of this type to run
             nodes_header(daemon_type)
+        else:
+            return
 
         for host, data in metadata[daemon_type].items():
             modules = [checks.common, getattr(checks, daemon_type, None)]
