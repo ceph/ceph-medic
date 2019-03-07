@@ -30,7 +30,8 @@ def get_connection(hostname, username=None, threads=5, use_sudo=None, detect_sud
             # check if conn is ok
             stdout, stderr, code = remoto.process.check(conn, ['whoami'])
             if code:
-                raise HostNotFound('Remote connection failed while testing connection: %s' % stderr)
+                raise HostNotFound(
+                    'Remote connection failed while testing connection:\n %s' % '\n'.join(stderr))
         elif deployment_type in ['ssh', 'baremetal']:
             conn = conn_obj(
                 hostname,
@@ -76,8 +77,8 @@ def container_platform_conn(hostname, conn_obj, deployment_type):
         'openshift': 'openshift',
     }
     deployment_type = container_platforms.get(deployment_type, 'kubernetes')
-    namespace = ceph_medic.config['file'].get_safe(deployment_type, 'namespace', 'rook-ceph')
-    context = ceph_medic.config['file'].get_safe(deployment_type, 'context', None)
+    namespace = ceph_medic.config.file.get_safe(deployment_type, 'namespace', 'rook-ceph')
+    context = ceph_medic.config.file.get_safe(deployment_type, 'context', None)
     return conn_obj(hostname, namespace, context=context)
 
 
