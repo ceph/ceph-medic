@@ -1,11 +1,4 @@
-try:
-    import configparser
-except ImportError:
-    import ConfigParser as configparser
-try:
-    from StringIO import StringIO
-except ImportError:
-    from io import StringIO
+from ceph_medic.compat import BaseConfigParser, configparser, StringIO
 import logging
 import os
 import sys
@@ -145,7 +138,7 @@ def load(path=None, file=None):
     parser = Conf()
     try:
         if file:
-            parser.readfp(file)
+            parser._read_file(file)
         elif path and os.path.exists(path):
             parser.read(path)
         else:
@@ -203,7 +196,7 @@ def get_overrides(_conf=None):
     return conf_arguments
 
 
-class Conf(configparser.SafeConfigParser):
+class Conf(BaseConfigParser):
     """
     Subclasses from SafeConfigParser to give a few helpers for the ceph-medic
     configuration. Specifically, it addresses the need to work with Ansible
@@ -255,6 +248,17 @@ class Conf(configparser.SafeConfigParser):
         s = s.replace('_', ' ')
         s = '_'.join(s.split())
         return s
+
+    def _read_file(self, _file):
+        """
+        The ConfigParser class is already quite the complicated object deriving
+        from an ABC type of class, deprecating ``.readfp()`` in Python3.3 and
+        newer - although it is available. This semi-private method provides the
+        abstraction depending on availability of the newer method type.
+        """
+        if hasattr(self, 'read_file'):
+            return self.read_file(_file)
+        return self.readfp(_file)
 
 
 class AnsibleInventoryParser(object):
