@@ -37,14 +37,20 @@ def container_platform(platform='openshift'):
     except RuntimeError:
         out = "{}"
         terminal.error('Unable to retrieve the pods using command: %s' % ' '.join(cmd))
+    else:
+        if code:
+            output = out + err
+            for line in output:
+                terminal.error(line)
 
-    if code:
-        out = "{}"
-        output = out + err
-        for line in output:
-            terminal.error(line)
+    try:
+        pods = json.loads(''.join(out))
+    except Exception:
+        # Python3 has JSONDecodeError which doesn't exist in Python2
+        # Python2 just raises ValueError
+        terminal.error('Invalid JSON on stdout: %s' % ''.join(out))
+        raise
 
-    pods = json.loads(''.join(out))
     base_inventory = {
         'rgws': [], 'mgrs': [], 'mdss': [], 'clients': [], 'osds': [], 'mons': []
     }
