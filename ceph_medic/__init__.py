@@ -20,6 +20,6 @@ config.nodes = {}
 
 metadata = {'failed_nodes': {}, 'rgws': {}, 'mgrs': {}, 'mdss': {}, 'clients': {}, 'osds': {}, 'mons': {}, 'nodes': {}}
 
-daemon_types = [i for i in metadata.keys() if i != 'nodes']
+daemon_types = [i for i in metadata.keys() if i not in ('nodes', 'failed_nodes')]
 
 __version__ = '1.0.4'
