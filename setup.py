@@ -109,7 +109,7 @@ setup(
     install_requires=[
         'execnet',
         'tambo',
-        'remoto>=1.1.0',
+        'remoto>=1.1.2',
     ] + install_requires,
 
     tests_require=[
