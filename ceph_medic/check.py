@@ -34,13 +34,13 @@ Configured Nodes:
 
     def _help(self):
         node_section = []
-        for daemon, node in ceph_medic.config['nodes'].items():
+        for daemon, node in ceph_medic.config.nodes.items():
             header = "\n* %s:\n" % daemon
-            body = '\n'.join(["    %s" % n for n in ceph_medic.config['nodes'][daemon]])
+            body = '\n'.join(["    %s" % n for n in ceph_medic.config.nodes[daemon]])
             node_section.append(header+body+'\n')
         return self.long_help.format(
             configured_nodes=''.join(node_section),
-            config_path=ceph_medic.config['config_path']
+            config_path=ceph_medic.config.config_path
         )
 
     def main(self):
@@ -56,9 +56,9 @@ Configured Nodes:
             return parser.print_help()
 
         # populate the nodes metadata with the configured nodes
-        for daemon in ceph_medic.config['nodes'].keys():
+        for daemon in ceph_medic.config.nodes.keys():
             ceph_medic.metadata['nodes'][daemon] = []
-        for daemon, nodes in ceph_medic.config['nodes'].items():
+        for daemon, nodes in ceph_medic.config.nodes.items():
             for node in nodes:
                 ceph_medic.metadata['nodes'][daemon].append({'host': node['host']})
 

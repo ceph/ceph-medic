@@ -1,6 +1,8 @@
 import ceph_medic
 from ceph_medic import runner
 from ceph_medic.tests import base_metadata
+from textwrap import dedent
+from ceph_medic.util import configuration
 
 
 class TestRunner(object):
@@ -49,7 +51,18 @@ class TestReport(object):
 class TestReportBasicOutput(object):
 
     def setup(self):
+        contents = dedent("""
+        [global]
+        #
+        """)
+        conf = configuration.load_string(contents)
+        ceph_medic.config.file = conf
+        runner.metadata = base_metadata
+        runner.metadata['cluster_name'] = 'ceph'
         runner.Runner().run()
+
+    def teardown(self):
+        runner.metadata = base_metadata
 
     def test_has_version(self, terminal):
         assert 'Version: ' in terminal.get_output()
@@ -83,6 +96,20 @@ class TestReportBasicOutput(object):
 
 
 class TestReportErrors(object):
+
+    def setup(self):
+        contents = dedent("""
+        [global]
+        #
+        """)
+        conf = configuration.load_string(contents)
+        ceph_medic.config.file = conf
+        runner.metadata = base_metadata
+        runner.metadata['cluster_name'] = 'ceph'
+        runner.Runner().run()
+
+    def teardown(self):
+        runner.metadata = base_metadata
 
     def test_get_new_lines_in_errors(self, terminal, mon_keyring, data, monkeypatch):
         data_node1 = data()
