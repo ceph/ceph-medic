@@ -66,3 +66,8 @@ Configured Nodes:
         test = runner.Runner()
         results = test.run()
         runner.report(results)
+        #XXX might want to make this configurable to not bark on warnings for
+        # example, setting forcefully for now, but the results object doesn't
+        # make a distinction between error and warning (!)
+        if results.errors or results.failed:
+            sys.exit(1)
