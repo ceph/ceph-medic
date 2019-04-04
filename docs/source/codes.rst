@@ -15,3 +15,4 @@ Below you'll find a list of checks that are performed with the ``check`` subcomm
    codes/common.rst
    codes/mons.rst
    codes/osds.rst
+   codes/cluster.rst
