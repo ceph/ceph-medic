@@ -33,6 +33,11 @@ class Runner(object):
         start_header()
         for daemon_type in daemon_types:
             self.run_daemons(daemon_type)
+
+        # these are checks that should run once per cluster
+        nodes_header('cluster')
+        self.run_cluster(checks.cluster)
+
         if metadata['failed_nodes']:
             terminal.write.bold('\n{daemon:-^30}\n'.format(daemon=' Failed Nodes '))
             for host, reason in metadata['failed_nodes'].items():
@@ -57,6 +62,48 @@ class Runner(object):
         for host, data in metadata[daemon_type].items():
             modules = [checks.common, getattr(checks, daemon_type, None)]
             self.run_host(host, data, modules)
+
+    def run_cluster(self, module):
+        # XXX get the cluster name here
+        cluster_name = '%s cluster' % metadata.get('cluster_name', 'ceph')
+        terminal.loader.write(' %s' % terminal.yellow(cluster_name))
+        has_error = False
+        checks = collect_checks(module)
+        for check in checks:
+            try:
+                # TODO: figure out how to skip running a specific check if
+                # the code is ignored, maybe introspecting the function?
+                result = getattr(module, check)()
+            except Exception as error:
+                result = None
+                logger.exception('check had an unhandled error: %s', check)
+                self.errors.append(error)
+            if result:
+                code, message = result
+                # XXX This is not ideal, we shouldn't need to get all the way here
+                # to make sure this is actually ignored. (Or maybe it doesn't matter?)
+                if code in self.ignore:
+                    self.skipped += 1
+                    # avoid writing anything else to the terminal, and just
+                    # go to the next check
+                    continue
+                self.failed += 1
+                if not has_error:
+                    # XXX get the cluster name here
+                    terminal.loader.write(' %s' % terminal.red(cluster_name))
+                    terminal.write.write('\n')
+
+                if code.startswith('E'):
+                    code = terminal.red(code)
+                elif code.startswith('W'):
+                    code = terminal.yellow(code)
+                terminal.write.write("   %s: %s\n" % (code, message))
+                has_error = True
+            else:
+                self.passed += 1
+
+        if not has_error:
+            terminal.loader.write(' %s\n' % terminal.green(cluster_name))
 
     def run_host(self, host, data, modules):
         terminal.loader.write(' %s' % terminal.yellow(host))
@@ -163,6 +210,7 @@ def nodes_header(daemon_type):
         'mons': ' mons ',
         'osds': ' osds ',
         'clients': ' clients ',
+        'cluster': ' cluster ',
     }
 
     terminal.write.bold('\n{daemon:-^30}\n'.format(
