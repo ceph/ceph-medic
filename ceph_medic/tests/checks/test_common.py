@@ -66,7 +66,7 @@ class TestCephSocketAndInstalledVersionParity(object):
         node1_data = make_data(
             {'ceph': {
                 "sockets": {
-                    "/var/run/ceph/osd.asok": {"version": "13.2.0"},
+                    "/var/run/ceph/osd.asok": {"version": {"version": "13.2.0"}},
                 },
                 "installed": True,
                 "version": "12.2.1",
@@ -81,7 +81,7 @@ class TestCephSocketAndInstalledVersionParity(object):
         node1_data = make_data(
             {'ceph': {
                 "sockets": {
-                    "/var/run/ceph/osd.asok": {"version": "12.2.0"},
+                    "/var/run/ceph/osd.asok": {"version": {"version": "12.2.0"}},
                 },
                 "installed": True,
                 "version": "ceph version 12.2.0 (32ce2a3ae5239ee33d6150705cdb24d43bab910c) luminous (rc)",
@@ -96,7 +96,7 @@ class TestCephSocketAndInstalledVersionParity(object):
         node1_data = make_data(
             {'ceph': {
                 "sockets": {
-                    "/var/run/ceph/osd.asok": {},
+                    "/var/run/ceph/osd.asok": {"version": {}, "config": {}},
                 },
                 "installed": True,
                 "version": "12.2.1",
@@ -105,3 +105,56 @@ class TestCephSocketAndInstalledVersionParity(object):
         metadata['mons']['node1'] = node1_data
         result = common.check_ceph_socket_and_installed_version_parity('node1', node1_data)
         assert result is None
+
+
+class TestRgwNumRadosHandles(object):
+
+    def test_value_is_larger_than_accepted(self, make_nodes, make_data):
+        metadata['nodes'] = make_nodes(mons=['node1'])
+        node1_data = make_data(
+            {'ceph': {
+                "sockets": {
+                    "/var/run/ceph/osd.asok": {'version': {}, 'config': {'rgw_num_rados_handles': 3}},
+                },
+                "installed": True,
+                "version": "12.2.1",
+            }}
+        )
+        metadata['mons']['node1'] = node1_data
+        result = common.check_rgw_num_rados_handles('node1', node1_data)
+        assert result == (
+            'WCOM7',
+            "rgw_num_rados_handles shouldn't be larger than 1, can lead to memory leaks: osd.asok"
+        )
+
+    def test_value_within_range(self, make_nodes, make_data):
+        metadata['nodes'] = make_nodes(mons=['node1'])
+        node1_data = make_data(
+            {'ceph': {
+                "sockets": {
+                    "/var/run/ceph/osd.asok": {'version': {}, 'config': {'rgw_num_rados_handles': 1}},
+                },
+                "installed": True,
+                "version": "12.2.1",
+            }}
+        )
+        metadata['mons']['node1'] = node1_data
+        result = common.check_rgw_num_rados_handles('node1', node1_data)
+        assert result is None
+
+    def test_multiple_value_is_larger_than_accepted(self, make_nodes, make_data):
+        metadata['nodes'] = make_nodes(mons=['node1'])
+        node1_data = make_data(
+            {'ceph': {
+                "sockets": {
+                    "/var/run/ceph/osd1.asok": {'version': {}, 'config': {'rgw_num_rados_handles': 2}},
+                    "/var/run/ceph/osd3.asok": {'version': {}, 'config': {'rgw_num_rados_handles': 3}},
+                },
+                "installed": True,
+                "version": "12.2.1",
+            }}
+        )
+        metadata['mons']['node1'] = node1_data
+        result = common.check_rgw_num_rados_handles('node1', node1_data)
+        assert 'osd1.asok' in str(result)
+        assert 'osd3.asok' in str(result)

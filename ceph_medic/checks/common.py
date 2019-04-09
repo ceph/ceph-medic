@@ -95,9 +95,30 @@ def check_ceph_socket_and_installed_version_parity(host, data):
     host_version = data['ceph']['version']
     sockets = data['ceph']['sockets']
     for socket, socket_data in sockets.items():
-        socket_version = socket_data.get('version')
+        socket_version = socket_data['version'].get('version')
         if socket_version and socket_version not in host_version:
             mismatched_sockets.append("%s:%s" % (socket, socket_version))
 
     if mismatched_sockets:
         return code, msg % (host_version, ','.join(mismatched_sockets))
+
+
+def check_rgw_num_rados_handles(host, data):
+    """
+    Although this is an RGW setting, the way Ceph handles configurations can
+    have this setting be different depending on the daemon. Since we are
+    checking on every host and every socket, we are placing this check here
+    with common checks.
+    """
+    code = 'WCOM7'
+    msg = "rgw_num_rados_handles shouldn't be larger than 1, can lead to memory leaks: %s"
+    sockets = data['ceph']['sockets']
+    failed = []
+    for socket, socket_data in sockets.items():
+        rgw_num_rados_handles = socket_data['config'].get('rgw_num_rados_handles', 1)
+        name = socket.split('/var/run/ceph/')[-1]
+        if rgw_num_rados_handles > 1:
+            failed.append(name)
+
+    if failed:
+        return code, msg % ','.join(failed)
