@@ -28,6 +28,24 @@ def ceph_socket_version(conn, socket):
         conn.logger.exception('failed to fetch ceph socket version')
 
 
+def daemon_socket_config(conn, socket):
+    """
+    Capture daemon-based config from the socket
+    """
+    try:
+        output, _, _ = check(conn, ['ceph', '--admin-daemon', socket, 'config', 'show'])
+        result = dict()
+        try:
+            result = json.loads(output[0])
+        except ValueError:
+            conn.logger.exception(
+                "failed to fetch ceph configuration via socket, invalid json: %s" % output[0]
+            )
+        return result
+    except RuntimeError:
+        conn.logger.exception('failed to fetch ceph configuration via socket')
+
+
 def ceph_is_installed(conn):
     try:
         stdout, stderr, exit_code = check(conn, ['which', 'ceph'])
