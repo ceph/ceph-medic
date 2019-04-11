@@ -28,7 +28,7 @@ def get_connection(hostname, username=None, threads=5, use_sudo=None, detect_sud
         if deployment_type in ['k8s', 'kubernetes', 'openshift', 'oc']:
             conn = container_platform_conn(hostname, conn_obj, deployment_type)
             # check if conn is ok
-            stdout, stderr, code = remoto.process.check(conn, ['whoami'])
+            stdout, stderr, code = remoto.process.check(conn, ['true'])
             if code:
                 raise HostNotFound(
                     'Remote connection failed while testing connection:\n %s' % '\n'.join(stderr))
