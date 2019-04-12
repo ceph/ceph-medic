@@ -35,10 +35,19 @@ class TestContainerPlatform(object):
 
     def test_garbage_stdout(self, stub_check, capsys):
         stub_check((['could not contact platform'], [], 1))
-        with pytest.raises(Exception):
+        with pytest.raises(SystemExit):
             hosts.container_platform('kubernetes')
         stdout, stderr = capsys.readouterr()
-        assert 'Invalid JSON on stdout' in stdout
+        assert 'Unable to load JSON from stdout' in stdout
+        assert 'could not contact platform' in stdout
+
+    def test_garbage_stderr(self, stub_check, capsys):
+        stub_check(([], ['could not contact platform'], 1))
+        with pytest.raises(SystemExit):
+            hosts.container_platform('kubernetes')
+        stdout, stderr = capsys.readouterr()
+        assert 'Unable to load JSON from stdout' in stdout
+        assert 'could not contact platform' in stdout
 
     def test_kubectl_with_context(self, stub_check):
         contents = dedent("""

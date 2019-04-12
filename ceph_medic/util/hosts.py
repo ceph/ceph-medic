@@ -1,6 +1,9 @@
 import json
+import logging
 from ceph_medic import config, terminal
 from remoto import connection, process
+
+logger = logging.getLogger(__name__)
 
 
 def _platform_options(platform):
@@ -48,8 +51,17 @@ def container_platform(platform='openshift'):
     except Exception:
         # Python3 has JSONDecodeError which doesn't exist in Python2
         # Python2 just raises ValueError
-        terminal.error('Invalid JSON on stdout: %s' % ''.join(out))
-        raise
+        stdout = ''.join(out)
+        stderr = ''.join(err)
+        logger.exception('Invalid JSON from stdout')
+        terminal.error('Unable to load JSON from stdout')
+        if stdout:
+            logger.error('stdout: %s', stdout)
+            terminal.error('stdout: %s' % stdout)
+        if stderr:
+            logger.error('stderr: %s', stderr)
+            terminal.error('stderr: %s' % stderr)
+        raise SystemExit(1)
 
     base_inventory = {
         'rgws': [], 'mgrs': [], 'mdss': [], 'clients': [], 'osds': [], 'mons': []
