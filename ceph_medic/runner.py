@@ -11,10 +11,11 @@ class Runner(object):
     def __init__(self):
         self.passed = 0
         self.skipped = 0
-        self.failed = 0
         self.total = 0
+        self.errors = 0
+        self.warnings = 0
         self.ignore = []
-        self.errors = []
+        self.internal_errors = []
 
     @property
     def total_hosts(self):
@@ -48,7 +49,7 @@ class Runner(object):
                 terminal.write.write("  %s\n" % main_reason)
                 for line in reason_lines:
                     terminal.write.write("   %s\n" % line)
-        self.total = self.failed + self.passed
+        self.total = self.errors + self.warnings + self.passed + len(self.internal_errors)
         return self
 
     def run_daemons(self, daemon_type):
@@ -77,7 +78,7 @@ class Runner(object):
             except Exception as error:
                 result = None
                 logger.exception('check had an unhandled error: %s', check)
-                self.errors.append(error)
+                self.internal_errors.append(error)
             if result:
                 code, message = result
                 # XXX This is not ideal, we shouldn't need to get all the way here
@@ -87,7 +88,6 @@ class Runner(object):
                     # avoid writing anything else to the terminal, and just
                     # go to the next check
                     continue
-                self.failed += 1
                 if not has_error:
                     # XXX get the cluster name here
                     terminal.loader.write(' %s' % terminal.red(cluster_name))
@@ -95,8 +95,10 @@ class Runner(object):
 
                 if code.startswith('E'):
                     code = terminal.red(code)
+                    self.errors += 1
                 elif code.startswith('W'):
                     code = terminal.yellow(code)
+                    self.warnings += 1
                 terminal.write.write("   %s: %s\n" % (code, message))
                 has_error = True
             else:
@@ -128,7 +130,6 @@ class Runner(object):
                         # avoid writing anything else to the terminal, and just
                         # go to the next check
                         continue
-                    self.failed += 1
                     if not has_error:
                         terminal.loader.write(' %s' % terminal.red(host))
                         terminal.write.write('\n')
