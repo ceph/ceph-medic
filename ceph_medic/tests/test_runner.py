@@ -38,14 +38,46 @@ class TestReport(object):
         runner.metadata['nodes'] = {}
         self.results = runner.Runner()
 
-    def test_reports_errors(self, terminal):
-        self.results.errors = ['I am an error']
+    def test_reports_internal_errors(self, terminal):
+        self.results.internal_errors = ['I am an error']
         runner.report(self.results)
-        assert 'While running checks, ceph-medic had unhandled errors' in terminal.calls[-1]
+        assert 'While running checks, ceph-medic had 1 unhandled errors' in terminal.calls[-1]
 
     def test_reports_no_errors(self, terminal):
         runner.report(self.results)
         assert terminal.calls[0] == '\n0 passed, on 0 hosts'
+
+    def test_reports_warning(self, terminal):
+        self.results.warnings = 1
+        runner.report(self.results)
+        assert terminal.calls[0] == '\n0 passed, 1 warning, on 0 hosts'
+
+    def test_reports_warnings(self, terminal):
+        self.results.warnings = 2
+        runner.report(self.results)
+        assert terminal.calls[0] == '\n0 passed, 2 warnings, on 0 hosts'
+
+    def test_reports_error(self, terminal):
+        self.results.errors = 1
+        runner.report(self.results)
+        assert terminal.calls[0] == '\n0 passed, 1 error, on 0 hosts'
+
+    def test_reports_errors(self, terminal):
+        self.results.errors = 2
+        runner.report(self.results)
+        assert terminal.calls[0] == '\n0 passed, 2 errors, on 0 hosts'
+
+    def test_reports_error_and_warning(self, terminal):
+        self.results.errors = 1
+        self.results.warnings = 1
+        runner.report(self.results)
+        assert terminal.calls[0] == '\n0 passed, 1 error, 1 warning, on 0 hosts'
+
+    def test_reports_errors_and_warnings(self, terminal):
+        self.results.errors = 2
+        self.results.warnings = 2
+        runner.report(self.results)
+        assert terminal.calls[0] == '\n0 passed, 2 errors, 2 warnings, on 0 hosts'
 
 
 class TestReportBasicOutput(object):
