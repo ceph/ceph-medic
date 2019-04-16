@@ -122,3 +122,12 @@ def check_rgw_num_rados_handles(host, data):
 
     if failed:
         return code, msg % ','.join(failed)
+
+
+def check_fsid_exists(host, data):
+    code = 'ECOM8'
+    msg = "'fsid' is missing in the ceph configuration"
+
+    current_fsid = get_fsid(data)
+    if not current_fsid:
+        return code, msg

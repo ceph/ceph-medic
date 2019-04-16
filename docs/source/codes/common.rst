@@ -50,3 +50,9 @@ ECOM7
 The installed version of ``ceph`` is not the same reported by a running ceph daemon. The installed ``ceph`` version should be
 the same as all running ceph daemons, if they do not match these daemons most likely have not been restarted correctly after
 a version change.
+
+.. _ECOM8:
+
+ECOM8
+^^^^^
+The ``fsid`` field must exist in the configuration for each node.
