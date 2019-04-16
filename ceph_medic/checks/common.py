@@ -65,7 +65,7 @@ def check_cluster_fsid(host, data):
         for host in hosts:
             hostname = host['host']
             host_fsid = get_fsid(metadata[daemon][hostname])
-            if current_fsid != host_fsid:
+            if host_fsid and current_fsid != host_fsid:
                 mismatched_hosts.append(hostname)
 
     if mismatched_hosts:
@@ -122,3 +122,12 @@ def check_rgw_num_rados_handles(host, data):
 
     if failed:
         return code, msg % ','.join(failed)
+
+
+def check_fsid_exists(host, data):
+    code = 'ECOM8'
+    msg = "'fsid' is missing in the ceph configuration"
+
+    current_fsid = get_fsid(data)
+    if not current_fsid:
+        return code, msg
