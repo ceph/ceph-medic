@@ -33,6 +33,47 @@ class TestGetFsid(object):
         fsid = common.get_fsid(data)
         assert fsid == '1234-lkjh'
 
+    def test_fsids_have_parity(self, make_nodes, make_data):
+        metadata['nodes'] = make_nodes(mons=['node1', 'node2'])
+        node1_data = make_data()
+        data = self.make_metadata("[global]\nfsid = 1234-lkjh   \n\n[mdss]\ndisabled=true\n")
+        node1_data["paths"] = data["paths"]
+        metadata['mons']['node1'] = node1_data
+        metadata['mons']['node2'] = node1_data
+        result = common.check_cluster_fsid('node1', node1_data)
+        assert result is None
+
+    def test_fsid_does_not_exist(self, make_nodes, make_data):
+        metadata['nodes'] = make_nodes(mons=['node1'])
+        node1_data = make_data()
+        data = self.make_metadata("[global]\nfoo = 1234-lkjh   \n\n[mdss]\ndisabled=true\n")
+        node1_data["paths"] = data["paths"]
+        metadata['mons']['node1'] = node1_data
+        result = common.check_fsid_exists('node1', node1_data)
+        assert "'fsid' is missing" in str(result)
+
+    def test_fsid_does_exist(self, make_nodes, make_data):
+        metadata['nodes'] = make_nodes(mons=['node1'])
+        node1_data = make_data()
+        data = self.make_metadata("[global]\nfsid = 1234-lkjh   \n\n[mdss]\ndisabled=true\n")
+        node1_data["paths"] = data["paths"]
+        metadata['mons']['node1'] = node1_data
+        result = common.check_fsid_exists('node1', node1_data)
+        assert result is None
+
+    def test_ignores_empty_fsid_during_cluster_fsid_check(self, make_nodes, make_data):
+        metadata['nodes'] = make_nodes(mons=['node1', 'node2'])
+        node1_data = make_data()
+        node2_data = make_data()
+        data = self.make_metadata("[global]\nfsid = 1234-lkjh   \n\n[mdss]\ndisabled=true\n")
+        node1_data["paths"] = data["paths"]
+        data = self.make_metadata("[global]\nfoo = 1234-lkjh   \n\n[mdss]\ndisabled=true\n")
+        node2_data["paths"] = data["paths"]
+        metadata['mons']['node1'] = node1_data
+        metadata['mons']['node2'] = node2_data
+        result = common.check_cluster_fsid('node1', node1_data)
+        assert result is None
+
 
 class TestCephVersionParity(object):
 
