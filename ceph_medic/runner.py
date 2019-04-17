@@ -11,10 +11,11 @@ class Runner(object):
     def __init__(self):
         self.passed = 0
         self.skipped = 0
-        self.failed = 0
         self.total = 0
+        self.errors = 0
+        self.warnings = 0
         self.ignore = []
-        self.errors = []
+        self.internal_errors = []
 
     @property
     def total_hosts(self):
@@ -48,7 +49,7 @@ class Runner(object):
                 terminal.write.write("  %s\n" % main_reason)
                 for line in reason_lines:
                     terminal.write.write("   %s\n" % line)
-        self.total = self.failed + self.passed
+        self.total = self.errors + self.warnings + self.passed + len(self.internal_errors)
         return self
 
     def run_daemons(self, daemon_type):
@@ -77,7 +78,7 @@ class Runner(object):
             except Exception as error:
                 result = None
                 logger.exception('check had an unhandled error: %s', check)
-                self.errors.append(error)
+                self.internal_errors.append(error)
             if result:
                 code, message = result
                 # XXX This is not ideal, we shouldn't need to get all the way here
@@ -87,7 +88,6 @@ class Runner(object):
                     # avoid writing anything else to the terminal, and just
                     # go to the next check
                     continue
-                self.failed += 1
                 if not has_error:
                     # XXX get the cluster name here
                     terminal.loader.write(' %s' % terminal.red(cluster_name))
@@ -95,8 +95,10 @@ class Runner(object):
 
                 if code.startswith('E'):
                     code = terminal.red(code)
+                    self.errors += 1
                 elif code.startswith('W'):
                     code = terminal.yellow(code)
+                    self.warnings += 1
                 terminal.write.write("   %s: %s\n" % (code, message))
                 has_error = True
             else:
@@ -128,14 +130,15 @@ class Runner(object):
                         # avoid writing anything else to the terminal, and just
                         # go to the next check
                         continue
-                    self.failed += 1
                     if not has_error:
                         terminal.loader.write(' %s' % terminal.red(host))
                         terminal.write.write('\n')
 
                     if code.startswith('E'):
+                        self.errors += 1
                         code = terminal.red(code)
                     elif code.startswith('W'):
+                        self.warnings += 1
                         code = terminal.yellow(code)
                     terminal.write.write("   %s: %s\n" % (code, message))
                     has_error = True
@@ -147,32 +150,42 @@ class Runner(object):
 
 
 run_errors = terminal.yellow("""
-While running checks, ceph-medic had unhandled errors, please look at the
+While running checks, ceph-medic had %s unhandled errors, please look at the
 configured log file and report the issue along with the traceback.
 """)
 
 
 def report(results):
-    msg = "\n{passed}{failed}{skipped}{errors}{hosts}"
+    msg = "\n{passed}{error}{warning}{skipped}{internal_errors}{hosts}"
 
-    if results.failed:
+    if results.errors:
         msg = terminal.red(msg)
-    elif results.errors:
+    elif results.warnings:
         msg = terminal.yellow(msg)
     else:
         msg = terminal.green(msg)
 
+    errors = warnings = internal_errors = ''
+
+    if results.errors:
+        errors = '%s errors, ' % results.errors if results.errors > 1 else '1 error, '
+    if results.warnings:
+        warnings = '%s warnings, ' % results.warnings if results.warnings > 1 else '1 warning, '
+    if results.internal_errors:
+        internal_errors = "%s internal errors, " % results.internal_errors
+
     terminal.write.raw(
         msg.format(
             passed="%s passed, " % results.passed,
-            failed="%s failed, " % results.failed if results.failed else '',
+            error=errors,
+            warning=warnings,
             skipped="%s skipped, " % results.skipped if results.skipped else '',
-            errors="%s errors, " % len(results.errors) if results.errors else '',
+            internal_errors=internal_errors,
             hosts="on %s hosts" % results.total_hosts
         )
     )
-    if results.errors:
-        terminal.write.raw(run_errors)
+    if results.internal_errors:
+        terminal.write.raw(run_errors % len(results.internal_errors))
 
 
 start_header_tmpl = """
