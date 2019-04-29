@@ -242,5 +242,5 @@ def collect_socket_info(conn, node_metadata):
     for socket in sockets:
         result[socket] = {'version': {}, 'config': {}}
         result[socket]['version'] = remote.commands.ceph_socket_version(conn, socket)
-        result[socket]['config'] = remote.commands.ceph_socket_version(conn, socket)
+        result[socket]['config'] = remote.commands.daemon_socket_config(conn, socket)
     return result
