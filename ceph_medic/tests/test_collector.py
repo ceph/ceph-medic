@@ -91,6 +91,7 @@ class TestCollectSocketInfo(object):
 
     def tests_collects_sockets(self, monkeypatch):
         monkeypatch.setattr(collector.remote.commands, 'ceph_socket_version', lambda conn, socket: dict())
+        monkeypatch.setattr(collector.remote.commands, 'daemon_socket_config', lambda conn, socket: dict())
         metadata = {
             'paths': {
                 '/var/run/ceph': {'files': ['/var/run/ceph/osd.asok']},
@@ -101,6 +102,7 @@ class TestCollectSocketInfo(object):
 
     def test_ignores_unknown_files(self, monkeypatch):
         monkeypatch.setattr(collector.remote.commands, 'ceph_socket_version', lambda conn, socket: dict())
+        monkeypatch.setattr(collector.remote.commands, 'daemon_socket_config', lambda conn, socket: dict())
         metadata = {
             'paths': {
                 '/var/run/ceph': {'files': ['/var/run/ceph/osd.asok', '/var/run/ceph/osd.log']},
