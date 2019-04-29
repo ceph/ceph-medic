@@ -33,7 +33,7 @@ def daemon_socket_config(conn, socket):
     Capture daemon-based config from the socket
     """
     try:
-        output, _, _ = check(conn, ['ceph', '--admin-daemon', socket, 'config', 'show'])
+        output, _, _ = check(conn, ['ceph', '--admin-daemon', socket, 'config', 'show', '--format', 'json'])
         result = dict()
         try:
             result = json.loads(output[0])
