@@ -7,7 +7,6 @@ def str_to_int(string):
     Some LVM values may come with a comma instead of a dot to define decimals.
     This function normalizes a comma into a dot
     """
-    error_msg = "Unable to convert to integer: '%s'" % str(string)
     try:
         integer = float(string.replace(',', '.'))
     except AttributeError:
