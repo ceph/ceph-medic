@@ -38,7 +38,7 @@ class TestReport(object):
         runner.metadata['nodes'] = {}
         self.results = runner.Runner()
 
-    def test_reports_internal_errors(self, terminal):
+    def test_reports_unhandled_internal_errors(self, terminal):
         self.results.internal_errors = ['I am an error']
         runner.report(self.results)
         assert 'While running checks, ceph-medic had 1 unhandled errors' in terminal.calls[-1]
