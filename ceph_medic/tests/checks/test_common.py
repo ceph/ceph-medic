@@ -75,6 +75,101 @@ class TestGetFsid(object):
         assert result is None
 
 
+class TestGetCommonFSID(object):
+
+    def setup(self):
+        metadata['cluster_name'] = 'ceph'
+        metadata['mons'] = {}
+
+    def teardown(self):
+        metadata['mons'] = {}
+
+    def test_get_common_fsid_fails(self, make_nodes, make_data):
+        metadata['nodes'] = make_nodes(mons=['node1', 'node2'])
+        node1_data = make_data({'ceph': {'sockets': {'/var/run/ceph/osd.socket': {'config': {}}}}})
+        metadata['mons']['node1'] = node1_data
+        assert common.get_common_fsid() == ''
+
+    def test_multiple_fsids_get_one_result(self, make_nodes, make_data):
+        metadata['nodes'] = make_nodes(mons=['node1', 'node2', 'node3'])
+        node1_data = make_data(
+            {'ceph': {'sockets': {'/var/run/ceph/osd.socket': {'config': {'fsid': 'aaaa'}}}}}
+        )
+        node2_data = make_data(
+            {'ceph': {'sockets': {'/var/run/ceph/osd.socket': {'config': {'fsid': 'bbbb'}}}}}
+        )
+        metadata['mons']['node1'] = node1_data
+        metadata['mons']['node2'] = node2_data
+        metadata['mons']['node3'] = node1_data
+        assert common.get_common_fsid() == 'aaaa'
+
+    def test_common_fsid_is_found(self, make_nodes, make_data):
+        metadata['nodes'] = make_nodes(mons=['node1', 'node2'])
+        node1_data = make_data(
+            {'ceph': {'sockets': {'/var/run/ceph/osd.socket': {'config': {'fsid': 'bbbb'}}}}}
+        )
+        node2_data = make_data(
+            {'ceph': {'sockets': {'/var/run/ceph/osd.socket': {'config': {'fsid': 'bbbb'}}}}}
+        )
+        metadata['mons']['node1'] = node1_data
+        metadata['mons']['node2'] = node2_data
+        assert common.get_common_fsid() == 'bbbb'
+
+
+class TestCheckFSIDPerDaemon(object):
+
+    def setup(self):
+        metadata['cluster_name'] = 'ceph'
+        metadata['mons'] = {}
+
+    def test_no_different_fsids_found(self, make_nodes, make_data):
+        metadata['nodes'] = make_nodes(mons=['node1', 'node2'])
+        node1_data = make_data(
+            {'ceph': {'sockets': {'/var/run/ceph/osd.socket': {'config': {'fsid': 'bbbb'}}}}}
+        )
+        node2_data = make_data(
+            {'ceph': {'sockets': {'/var/run/ceph/osd.socket': {'config': {'fsid': 'bbbb'}}}}}
+        )
+        metadata['mons']['node1'] = node1_data
+        metadata['mons']['node2'] = node2_data
+        assert common.check_fsid_per_daemon('node1', node1_data) is None
+
+    def test_single_different_fsid_found(self, make_nodes, make_data):
+        metadata['nodes'] = make_nodes(mons=['node1', 'node2', 'node3'])
+        node1_data = make_data(
+            {'ceph': {'sockets': {'/var/run/ceph/osd.socket': {'config': {'fsid': 'aaaa'}}}}}
+        )
+        node2_data = make_data(
+            {'ceph': {'sockets': {'/var/run/ceph/osd.socket': {'config': {'fsid': 'bbbb'}}}}}
+        )
+        metadata['mons']['node1'] = node1_data
+        metadata['mons']['node2'] = node2_data
+        metadata['mons']['node3'] = node1_data
+        code, msg = common.check_fsid_per_daemon('node2', node2_data)
+        assert 'Found cluster FSIDs from running sockets different than: aaaa' in msg
+        assert 'osd.socket : bbbb' in msg
+
+    def test_multiple_different_fsid_found(self, make_nodes, make_data):
+        metadata['nodes'] = make_nodes(mons=['node1', 'node2'])
+        node1_data = make_data(
+            {'ceph': {'sockets': {'/var/run/ceph/osd.socket': {'config': {'fsid': 'bbbb'}}}}}
+        )
+        node2_data = make_data(
+            {'ceph': {'sockets': {
+                '/var/run/ceph/osd1.socket': {'config': {'fsid': 'dddd'}},
+                '/var/run/ceph/osd3.socket': {'config': {'fsid': 'bbbb'}},
+                '/var/run/ceph/osd2.socket': {'config': {'fsid': 'cccc'}},
+                }
+            }}
+        )
+        metadata['mons']['node1'] = node1_data
+        metadata['mons']['node2'] = node2_data
+        code, msg = common.check_fsid_per_daemon('node2', node2_data)
+        assert 'Found cluster FSIDs from running sockets different than: bbbb' in msg
+        assert 'osd1.socket : dddd' in msg
+        assert 'osd2.socket : cccc' in msg
+
+
 class TestCephVersionParity(object):
 
     def setup(self):

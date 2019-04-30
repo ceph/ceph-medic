@@ -8,6 +8,9 @@ class TestCheckOSDs(object):
         metadata['cluster_name'] = 'ceph'
         metadata['osds'] = {}
 
+    def teardown(self):
+        metadata['osds'] = {}
+
     def test_no_osds(self):
         assert cluster.check_osds_exist() == ('ECLS1', 'There are no OSDs available')
 

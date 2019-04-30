@@ -1,5 +1,6 @@
-from ceph_medic import metadata
-from ceph_medic.util import configuration
+from collections import Counter
+from ceph_medic import metadata, daemon_types
+from ceph_medic.util import configuration, str_to_int
 
 
 #
@@ -11,12 +12,48 @@ def get_fsid(data):
     # information. ceph-deploy is a good example on how to do this. See:
     # https://github.com/ceph/ceph-deploy/blob/master/ceph_deploy/conf/ceph.py
     cluster_path = '/etc/ceph/%s.conf' % metadata['cluster_name']
-    contents = data['paths']['/etc/ceph']['files'][cluster_path]['contents']
+    try:
+        contents = data['paths']['/etc/ceph']['files'][cluster_path]['contents']
+    except KeyError:
+        return ''
     conf = configuration.load_string(contents)
     try:
         return conf.get_safe('global', 'fsid', '')
     except IndexError:
         return ''
+
+
+def get_common_fsid():
+    """
+    Determine what is the most common Cluster FSID. If all of them are the same
+    then we are fine, but if there is a mix, we need some base to compare to.
+    """
+    all_fsids = []
+
+    for daemon_type in daemon_types:
+        for node_metadata in metadata[daemon_type].values():
+            fsids = get_host_fsids(node_metadata)
+            all_fsids.extend(fsids)
+
+    try:
+        common_fsid = Counter(all_fsids).most_common()[0][0]
+    except IndexError:
+        return ''
+    return common_fsid
+
+
+def get_host_fsids(node_metadata):
+    """
+    Return all the cluster FSIDs found for each socket in a host
+    """
+    all_fsids = []
+    for socket_metadata in node_metadata['ceph']['sockets'].values():
+        fsid = socket_metadata['config'].get('fsid')
+        if not fsid:
+            continue
+        all_fsids.append(fsid)
+    return all_fsids
+
 
 #
 # Error checks
@@ -60,6 +97,11 @@ def check_cluster_fsid(host, data):
     mismatched_hosts = []
 
     current_fsid = get_fsid(data)
+
+    # no fsid exists for the current host as defined in ceph.conf, let other
+    # checks note about this instead of reporting an empty FSID
+    if not current_fsid:
+        return
 
     for daemon, hosts in metadata['nodes'].items():
         for host in hosts:
@@ -117,6 +159,7 @@ def check_rgw_num_rados_handles(host, data):
     for socket, socket_data in sockets.items():
         rgw_num_rados_handles = socket_data['config'].get('rgw_num_rados_handles', 1)
         name = socket.split('/var/run/ceph/')[-1]
+        rgw_num_rados_handles = str_to_int(rgw_num_rados_handles)
         if rgw_num_rados_handles > 1:
             failed.append(name)
 
@@ -130,4 +173,34 @@ def check_fsid_exists(host, data):
 
     current_fsid = get_fsid(data)
     if not current_fsid:
+        return code, msg
+
+
+def check_fsid_per_daemon(host, data):
+    """
+    In certain deployments types (hi rook!) the FSID will not be present in a
+    ceph conf file - it will be passed in *directly* to the daemon as an
+    argument. We aren't going to parse arguments, but the admin socket allows
+    us to poke inside and check what cluster FSID the daemon is associated
+    with.
+    """
+    code = 'ECOM9'
+    msg = 'Found cluster FSIDs from running sockets different than: %s'
+    sockets = data['ceph']['sockets']
+    common_fsid = get_common_fsid()
+    if not common_fsid:  # is this even possible?
+        return
+
+    msg = msg % common_fsid
+    sockets = data['ceph']['sockets']
+    failed = False
+    for socket, socket_data in sockets.items():
+        socket_fsid = socket_data['config'].get('fsid')
+        if not socket_fsid:
+            continue
+        if socket_fsid != common_fsid:
+            name = socket.split('/var/run/ceph/')[-1]
+            msg += '\n    %s : %s' % (name, socket_fsid)
+            failed = True
+    if failed:
         return code, msg

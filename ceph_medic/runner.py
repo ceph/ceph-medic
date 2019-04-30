@@ -120,7 +120,7 @@ class Runner(object):
                 except Exception as error:
                     result = None
                     logger.exception('check had an unhandled error: %s', check)
-                    self.errors.append(error)
+                    self.internal_errors.append(error)
                 if result:
                     code, message = result
                     # XXX This is not ideal, we shouldn't need to get all the way here
@@ -172,7 +172,7 @@ def report(results):
     if results.warnings:
         warnings = '%s warnings, ' % results.warnings if results.warnings > 1 else '1 warning, '
     if results.internal_errors:
-        internal_errors = "%s internal errors, " % results.internal_errors
+        internal_errors = "%s internal errors, " % len(results.internal_errors)
 
     terminal.write.raw(
         msg.format(
