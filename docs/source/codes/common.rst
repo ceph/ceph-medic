@@ -2,6 +2,16 @@ Common
 ======
 The following checks indiciate general issues with the cluster that are not specific to any daemon type.
 
+Warnings
+--------
+
+.. _WCOM1:
+
+WCOM1
+^^^^^
+A running OSD and MON daemon was detected in the same node. Colocating OSDs and MONs is highly discouraged.
+
+
 Errors
 ------
 
@@ -21,13 +31,13 @@ The ``ceph`` executable was not found.
 
 ECOM3
 ^^^^^
-The ``/var/lib/ceph`` directory does not exist or could not be collected.  
+The ``/var/lib/ceph`` directory does not exist or could not be collected.
 
 .. _ECOM4:
 
 ECOM4
 ^^^^^
-The ``/var/lib/ceph`` directory was not owned by the ``ceph`` user. 
+The ``/var/lib/ceph`` directory was not owned by the ``ceph`` user.
 
 .. _ECOM5:
 
@@ -56,3 +66,17 @@ a version change.
 ECOM8
 ^^^^^
 The ``fsid`` field must exist in the configuration for each node.
+
+
+.. _ECOM9:
+
+ECOM9
+^^^^^
+A cluster should not have running daemons with a cluster ``fsid`` that is different from the rest of the daemons in a cluster. This can potentially mean that different cluster identifiers are being used, and that shouldn't be the case.
+
+
+.. _ECOM10:
+
+ECOM10
+^^^^^^
+Only a single monitor daemon shuld be running per host, having more than one monitor running on the same host reduces a cluster's resilience if the node goes down.
