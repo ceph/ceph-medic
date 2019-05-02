@@ -294,3 +294,57 @@ class TestRgwNumRadosHandles(object):
         result = common.check_rgw_num_rados_handles('node1', node1_data)
         assert 'osd1.asok' in str(result)
         assert 'osd3.asok' in str(result)
+
+
+class TestMultipleRunningMons(object):
+
+    def test_no_multiple_mons_found(self, data):
+        result = common.check_multiple_running_mons(None, data())
+        assert result is None
+
+    def test_multiple_mons_found(self, data):
+        fake_data = data()
+        fake_data['ceph']['sockets'] = {
+            '/var/lib/ceph/ceph-mon.0.asok': {},
+            '/var/lib/ceph/ceph-mon.1.asok': {},
+            '/var/lib/ceph/ceph-mon.2.asok': {},
+        }
+
+        code, message = common.check_multiple_running_mons(None, fake_data)
+        assert code == 'ECOM10'
+        assert 'mon.0' in message
+        assert 'mon.1' in message
+        assert 'mon.2' in message
+
+
+class TestColocatedMonsOSDs(object):
+
+    def test_no_colocation_found(self, data):
+        result = common.check_colocated_running_mons_osds(None, data())
+        assert result is None
+
+    def test_no_osds_found(self, data):
+        fake_data = data()
+        fake_data['ceph']['sockets'] = {
+            '/var/lib/ceph/ceph-mon.0.asok': {},
+            '/var/lib/ceph/ceph-mon.1.asok': {},
+            '/var/lib/ceph/ceph-mon.2.asok': {},
+        }
+
+        result = common.check_colocated_running_mons_osds(None, fake_data)
+        assert result is None
+
+    def test_multiple_mons_found(self, data):
+        fake_data = data()
+        fake_data['ceph']['sockets'] = {
+            '/var/lib/ceph/ceph-mon.0.asok': {},
+            '/var/lib/ceph/ceph-mon.1.asok': {},
+            '/var/lib/ceph/ceph-osd.2.asok': {},
+        }
+
+        code, message = common.check_colocated_running_mons_osds(None, fake_data)
+        assert code == 'WCOM1'
+        assert 'osd.2' in message
+        assert 'mon.1' not in message
+        assert 'mon.2' not in message
+
