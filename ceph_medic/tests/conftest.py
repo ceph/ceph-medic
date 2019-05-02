@@ -57,7 +57,7 @@ def data():
     """
     def _data():
         return {
-            'ceph': {'installed': True, 'version': '12.2.1'},
+            'ceph': {'installed': True, 'version': '12.2.1', 'sockets':{}},
             'paths': {
                 '/etc/ceph': {'files': {}, 'dirs': {}},
                 '/var/lib/ceph': {'files': {}, 'dirs': {}},
