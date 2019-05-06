@@ -56,6 +56,26 @@ def get_host_fsids(node_metadata):
 
 
 #
+# Warning checks
+#
+
+def check_colocated_running_mons_osds(host, data):
+    code = 'WCOM1'
+    msg = 'collocated OSDs with MONs running: %s'
+    sockets = data['ceph']['sockets']
+    running_mons = []
+    running_osds = []
+    for socket_name in sockets.keys():
+        if "mon." in socket_name:
+            running_mons.append(socket_name)
+        elif "osd." in socket_name:
+            running_osds.append(socket_name)
+    if running_mons and running_osds:
+        daemons = "\n    %s" % ','.join(running_osds)
+        return code, msg % daemons
+
+
+#
 # Error checks
 #
 
@@ -204,3 +224,15 @@ def check_fsid_per_daemon(host, data):
             failed = True
     if failed:
         return code, msg
+
+
+def check_multiple_running_mons(host, data):
+    code = 'ECOM10'
+    msg = 'multiple running mons found: %s'
+    sockets = data['ceph']['sockets']
+    running_mons = []
+    for socket_name in sockets.keys():
+        if "mon." in socket_name:
+            running_mons.append(socket_name)
+    if len(running_mons) > 1:
+        return code, msg % ','.join(running_mons)

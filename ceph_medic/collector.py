@@ -78,7 +78,7 @@ def collect_paths(conn):
         "/var/lib/ceph": {
             'get_contents': True,
             'skip_files': ['activate.monmap', 'superblock'],
-            'skip_dirs': ['current', 'store.db']
+            'skip_dirs': ['tmp', 'current', 'store.db']
         },
         "/var/run/ceph": {'get_contents': False},
     }
