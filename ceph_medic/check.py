@@ -50,8 +50,8 @@ Configured Nodes:
             check_version=False
         )
         parser.catch_help = self._help()
-
         parser.parse_args()
+        ignored_codes = parser.get('--ignore', '').strip().strip(',').split(',')
         if len(self.argv) < 1:
             return parser.print_help()
 
@@ -64,6 +64,7 @@ Configured Nodes:
 
         collector.collect()
         test = runner.Runner()
+        test.ignore = ignored_codes
         results = test.run()
         runner.report(results)
         #XXX might want to make this configurable to not bark on warnings for
