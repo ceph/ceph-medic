@@ -58,6 +58,33 @@ class TestStatPath(object):
             assert callable(value) is False
 
 
+class TestStatPathErrors(object):
+
+    def test_captures_exceptions(self):
+        result = functions.stat_path('/does/not/exist')
+        assert result['exception']['attributes']['errno'] == '2'
+        assert result['exception']['name'] in ['FileNotFoundError', 'OSError']
+
+
+class AttributeLandMine(object):
+
+    @property
+    def explode(self):
+        raise ValueError('Raising on attribute access')
+
+
+class TestCaptureException(object):
+
+    def test_exceptions_in_errors_are_ignored(self):
+        result = functions.capture_exception(AttributeLandMine())
+        assert result['attributes'] == {'explode': None}
+
+    def test_unserializable_attributes(self, factory):
+        error = factory(unserial=lambda: True)
+        result = functions.capture_exception(error)
+        assert '<function ' in result['attributes']['unserial']
+
+
 class TestPathTree(object):
 
     def test_skip_dirs(self, tmpdir):
