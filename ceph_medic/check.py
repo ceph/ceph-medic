@@ -7,6 +7,18 @@ from tambo import Transport
 logger = logging.getLogger(__name__)
 
 
+def as_list(string):
+    if not string:
+        return []
+    string = string.strip(',')
+
+    # split on commas
+    string = string.split(',')
+
+    # strip spaces
+    return [x.strip() for x in string]
+
+
 class Check(object):
     help = "Run checks for all the configured nodes in a cluster or hosts file"
     long_help = """
@@ -45,13 +57,18 @@ Configured Nodes:
 
     def main(self):
         options = ['--ignore']
+        config_ignores = ceph_medic.config.file.get_list('check', '--ignore')
         parser = Transport(
             self.argv, options=options,
             check_version=False
         )
         parser.catch_help = self._help()
-
         parser.parse_args()
+        ignored_codes = as_list(parser.get('--ignore', ''))
+        # fallback to the configuration if nothing is defined in the CLI
+        if not ignored_codes:
+            ignored_codes = config_ignores
+
         if len(self.argv) < 1:
             return parser.print_help()
 
@@ -64,6 +81,7 @@ Configured Nodes:
 
         collector.collect()
         test = runner.Runner()
+        test.ignore = ignored_codes
         results = test.run()
         runner.report(results)
         #XXX might want to make this configurable to not bark on warnings for

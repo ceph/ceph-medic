@@ -16,7 +16,15 @@ def capture_exception(error):
     details['traceback'] = ''.join(traceback.format_exception(exc_type, exc_value, exc_traceback))
     for attr in dir(error):
         if not attr.startswith('__'):
-            details['attributes'][attr] = getattr(error, attr)
+            try:
+                details['attributes'][attr] = str(getattr(error, attr))
+            except Exception:
+                # getting an exception here is entirely possible, and since
+                # there is no remote logging there is nothing we can do other
+                # than eat it up. This section is going through each of the
+                # attributes of the exception raised so it is mildly acceptable
+                # to skip if anything is breaking
+                details['attributes'][attr] = None
     return details
 
 
