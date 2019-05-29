@@ -4,10 +4,10 @@
    contain the root `toctree` directive.
 
 =================================================
-ceph-medic -- Find common issues in Ceph clusters
+Introduction
 =================================================
 
-``ceph-medic`` is a very simple tool to run against a Ceph cluster to detect
+``ceph-medic`` is a very simple tool that runs against a Ceph cluster to detect
 common issues that might prevent correct functionality. It requires
 non-interactive SSH access to accounts that can ``sudo`` without a password
 prompt.
@@ -16,8 +16,8 @@ Usage
 =====
 
 The basic usage of ``ceph-medic`` is to perform checks against a ceph cluster
-to identify potential issues with it's installation or configuration. To do
-this you'd run the following command::
+to identify potential issues with its installation or configuration. To do
+this, run the following command::
 
     ceph-medic --inventory /path/to/hosts --ssh-config /path/to/ssh_config check
 
@@ -41,11 +41,11 @@ and ``clients``.  An example ``hosts`` file would look like::
     mgr0
 
 The location of the ``hosts`` file can be passed into ``ceph-medic`` by using
-the ``--inventory`` cli option. e.g ``ceph-medic --inventory /path/to/hosts``
+the ``--inventory`` cli option (e.g ``ceph-medic --inventory /path/to/hosts``).
 
-If the ``--inventory`` option is not defined ``ceph-medic`` will first look in
-the current working directory for a file named ``hosts``. If that file does not
-exist it will look for ``/etc/ansible/hosts`` to be used as the inventory.
+If the ``--inventory`` option is not defined, ``ceph-medic`` will first look in
+the current working directory for a file named ``hosts``. If the file does not
+exist, it will look for ``/etc/ansible/hosts`` to be used as the inventory.
 
 .. note:: Defining the inventory location is also possible via the config file
           under the ``[global]`` section.
@@ -54,8 +54,8 @@ exist it will look for ``/etc/ansible/hosts`` to be used as the inventory.
 Inventory for Containers
 ------------------------
 Containers are usually deployed under *baremetal* hosts, so it is possible to
-just define the hosts like a regular inventory, and ceph-medic will connect to
-the containers that exist in the host to produce a meaningful report.
+define the hosts like a regular inventory, and ceph-medic will connect to
+the containers existing in the host to produce a meaningful report.
 
 
 Inventory for Container Platforms
@@ -73,8 +73,8 @@ configuration needs to define ``deployment_type`` to either ``kubernetes`` or
 
 When using ``openshift`` or ``kubernetes`` as a deployment type, there is no
 requirement to define a ``hosts`` file. The hosts are generated dynamically by
-calling out to the platform and retrieve the pods. When the pods are
-identified, they get grouped by their deamon type (osd, mgr, rgw, mon, etc...)
+calling out to the platform and retrieving the pods. When the pods are
+identified, they are grouped by deamon type (osd, mgr, rgw, mon, etc...).
 
 SSH Config
 ----------
@@ -85,7 +85,7 @@ SSH access to accounts that can ``sudo`` without a password prompt.
 .. note::
    This is the same ssh config required by ansible. If you've used ``ceph-ansible`` to deploy your
    cluster then your nodes are most likely already configured for this type of ssh access. If that
-   is the case, using the same user that was performed the initial deployment would be easiest.
+   is the case, using the same user that performed the initial deployment would be easiest.
 
 To provide your ssh config you must use the ``--ssh-config`` flag and give it
 a path to a file that defines your ssh configuration. For example, a file like
@@ -122,15 +122,15 @@ Logging
 -------
 
 By default ``ceph-medic`` sends complete logs to the current working directory.
-This log file is more verbose than the output you see on the terminal. To
-change where these logs are created modify the default value for ``--log-path``
+This log file is more verbose than the output displayed on the terminal. To
+change where these logs are created, modify the default value for ``--log-path``
 in ``~/.cephmedic.conf``.
 
 Running checks
 --------------
 
 To perform checks against your cluster use the ``check`` subcommand. This will
-perform a series of general checks as well as checks specific to each daemon.
+perform a series of general checks, as well as checks specific to each daemon.
 Sample output from this command will look like::
 
     ceph-medic --ssh-config vagrant_ssh_config check

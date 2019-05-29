@@ -1,7 +1,7 @@
 OSDs
 ====
 
-The following checks indicate issue with OSD nodes.
+The following checks indicate issues with OSD nodes.
 
 Warnings
 --------
@@ -21,6 +21,6 @@ clusters you expect.
 
 WOSD2
 ^^^^^
-Setting ``osd pool default min size = 1`` can lead to data loss because if
+Setting ``osd pool default min size = 1`` can lead to data loss because if the
 minimum is not met, Ceph will not acknowledge the write to the client.
 

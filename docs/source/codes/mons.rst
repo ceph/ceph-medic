@@ -1,7 +1,7 @@
 Monitors
 ========
 
-The following checks indicate issue with monitor nodes.
+The following checks indicate issues with monitor nodes.
 
 Errors
 ------
@@ -26,7 +26,7 @@ Multiple monitor directories are found on the same host.
 
 WMON2
 _____
-Collocated OSDs in monitors nodes where found on the same host.
+Collocated OSDs in monitor nodes were found on the same host.
 
 .. _WMON3:
 

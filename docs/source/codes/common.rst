@@ -9,7 +9,7 @@ Warnings
 
 WCOM1
 ^^^^^
-A running OSD and MON daemon was detected in the same node. Colocating OSDs and MONs is highly discouraged.
+A running OSD and MON daemon were detected in the same node. Colocating OSDs and MONs is highly discouraged.
 
 
 Errors
@@ -19,7 +19,7 @@ Errors
 
 ECOM1
 ^^^^^
-A ceph configuration file can not be found at ``/etc/ceph/$cluster-name.conf``.
+A ceph configuration file cannot be found at ``/etc/ceph/$cluster-name.conf``.
 
 .. _ECOM2:
 
@@ -57,9 +57,7 @@ the same for all nodes in the cluster.
 
 ECOM7
 ^^^^^
-The installed version of ``ceph`` is not the same reported by a running ceph daemon. The installed ``ceph`` version should be
-the same as all running ceph daemons, if they do not match these daemons most likely have not been restarted correctly after
-a version change.
+The installed version of ``ceph`` is not the same as the one of a running ceph daemon. The installed ``ceph`` version should be the same as all running ceph daemons. If they do not match, the daemons most likely have not been restarted correctly after a version change.
 
 .. _ECOM8:
 
@@ -72,7 +70,7 @@ The ``fsid`` field must exist in the configuration for each node.
 
 ECOM9
 ^^^^^
-A cluster should not have running daemons with a cluster ``fsid`` that is different from the rest of the daemons in a cluster. This can potentially mean that different cluster identifiers are being used, and that shouldn't be the case.
+A cluster should not have running daemons with a cluster ``fsid`` that is different from the rest of the daemons in a cluster. This potentially means that different cluster identifiers are being used, and that should not be the case.
 
 
 .. _ECOM10:
