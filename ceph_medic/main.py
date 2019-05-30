@@ -117,7 +117,7 @@ Global Options:
 
         # Deployment Type
         deployment_type = ceph_medic.config.file.get_safe('global', 'deployment_type', 'baremetal')
-        if deployment_type in ['kubernetes', 'openshift']:
+        if deployment_type in ['kubernetes', 'openshift', 'k8s', 'oc']:
             pod_hosts = hosts.container_platform(deployment_type)
             ceph_medic.config.nodes = pod_hosts
             ceph_medic.config.hosts_file = ':memory:'
