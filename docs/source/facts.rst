@@ -13,8 +13,7 @@ gathered. Each daemon 'type' is the primary key::
     }
 
 
-There are other top-level keys that make it easier to deal with fact metadata,
-like for example a full list of all hosts discovered::
+There are other top-level keys that make it easier to deal with fact metadata, for example a full list of all hosts discovered::
 
     'hosts': ['node1', 'node2', 'node3'],
     'osds': ['node1', 'node2'],
@@ -22,9 +21,8 @@ like for example a full list of all hosts discovered::
 
 
 Each host has distinct metadata that gets collected. If any errors are
-detected, the ``exception`` key is set populated with all information regarding
-to the error generated when trying to execute the call.  For example a failure
-on a call to ``stat`` on a path might be::
+detected, the ``exception`` key is set populated with all information pertaining
+to the error generated when trying to execute the call.  For example, a failed call to ``stat`` on a path might be::
 
     'osd': {
         'node1': {
@@ -49,7 +47,7 @@ on a call to ``stat`` on a path might be::
 Note that objects will not get pickled, so data structures and objects will be
 sent back as plain text.
 
-Path contents are optionally enabled by the fact engine and it will contain the
+Path contents are optionally enabled by the fact engine and will contain the
 raw representation of the full file contents. Here is an example of what
 a ``ceph.conf`` file would be in a monitor node::
 

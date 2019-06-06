@@ -1,6 +1,6 @@
 Cluster
 =======
-Cluster checks run once against the information of a cluster, and checks are
+Cluster checks run once against the information of a cluster, and are
 not specific to any deamon.
 
 
