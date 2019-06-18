@@ -60,11 +60,11 @@ the containers existing in the host to produce a meaningful report.
 
 Inventory for Container Platforms
 ---------------------------------
-Both ``kubernetes`` and ``openshift`` platforms can host containers remotely
-but do allow to connect and retrieve information from a central location. To
-configure ceph-medic to connect to a platform the glocal section of the
-configuration needs to define ``deployment_type`` to either ``kubernetes`` or
-``openshift``. For example::
+Both ``kubernetes`` and ``openshift`` platforms can host containers remotely,
+but do allow to connect and retrieve information from a central location. 
+To configure ceph-medic to connect to a platform, the glocal section of the
+configuration needs to define ``deployment_type`` to either ``kubernetes``, which
+uses the ``kubectl`` command, or ``openshift``, which uses the ``oc`` command. For example::
 
     [global]
 
