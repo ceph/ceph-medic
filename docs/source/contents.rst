@@ -8,3 +8,4 @@ ceph-medic contents
    installation.rst
    codes.rst
    facts.rst
+   changelog.rst
