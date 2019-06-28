@@ -1,9 +1,9 @@
 # flake8: noqa
 
 try:
-    import configparser
-except ImportError:
     import ConfigParser as configparser
+except ImportError:
+    import configparser
 
 try:
     from ConfigParser import SafeConfigParser as BaseConfigParser
