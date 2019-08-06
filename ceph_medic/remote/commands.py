@@ -9,7 +9,10 @@ from remoto.process import check
 
 def ceph_version(conn):
     try:
-        output, _, _ = check(conn, ['ceph', '--version'])
+        output, _, exit_code = check(conn, ['ceph', '--version'])
+        if exit_code != 0:
+            conn.logger.error('Non zero exit status received, unable to retrieve information')
+            return
         return output[0]
     except RuntimeError:
         conn.logger.exception('failed to fetch ceph version')
@@ -17,12 +20,20 @@ def ceph_version(conn):
 
 def ceph_socket_version(conn, socket):
     try:
-        output, _, _ = check(conn, ['ceph', '--admin-daemon', socket, 'version'])
         result = dict()
+        output, _, exit_code = check(
+            conn,
+            ['ceph', '--admin-daemon', socket, 'version']
+        )
+        if exit_code != 0:
+            conn.logger.error('Non zero exit status received, unable to retrieve information')
+            return result
         try:
             result = json.loads(output[0])
         except ValueError:
-            conn.logger.exception("failed to fetch ceph socket version, invalid json: %s" % output[0])
+            conn.logger.exception(
+                "failed to fetch ceph socket version, invalid json: %s" % output[0]
+            )
         return result
     except RuntimeError:
         conn.logger.exception('failed to fetch ceph socket version')
@@ -33,7 +44,13 @@ def daemon_socket_config(conn, socket):
     Capture daemon-based config from the socket
     """
     try:
-        output, _, _ = check(conn, ['ceph', '--admin-daemon', socket, 'config', 'show', '--format', 'json'])
+        output, _, exit_code = check(
+            conn,
+            ['ceph', '--admin-daemon', socket, 'config', 'show', '--format', 'json']
+        )
+        if exit_code != 0:
+            conn.logger.error('Non zero exit status received, unable to retrieve information')
+            return
         result = dict()
         try:
             result = json.loads(output[0])
