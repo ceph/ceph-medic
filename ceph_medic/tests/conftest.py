@@ -132,6 +132,17 @@ def factory():
 
 
 @pytest.fixture
+def conn():
+    """
+    Useful when trying to pass a ``conn`` object around that will porbably want
+    to log output
+    """
+    log = lambda x: x
+    logger = Factory(error=log, exception=log)
+    return Factory(logger=logger)
+
+
+@pytest.fixture
 def capture():
     return Capture()
 
@@ -156,11 +167,43 @@ def stub_check(monkeypatch):
     Monkeypatches process.check, so that a caller can add behavior to the
     response
     """
-    def apply(return_values):
+    def apply(return_values, module=None, string_module='remoto.process.check'):
+        """
+        ``return_values`` should be a tuple of 3 elements: stdout, stderr, and
+        code. This should mimic the ``check()`` return values. For example::
+
+            (['stdout'], ['stderr'], 0)
+
+        Each item in the stdout or stderr lists represents a line.
+        Additionally, if more than one response is wanted, a list with multiple
+        tuples can be provided::
+
+
+            [
+                (['output'], [], 0),
+                ([], ['error condition'], 1),
+                (['output'], [], 0),
+            ]
+
+        When patching, most of the time the default ``string_module`` will be
+        fine, but if it is required to patch an actual module with the added
+        string, then it is possible to use them accordingly: whne the module is
+        set, the call to ``monkeypatch`` will use both like::
+
+            monkeypatch.setattr(module, 'function', value)
+
+        Otherwise it will just patch it like::
+
+            monkeypatch.setattr('remoto.process.check', value)
+
+        """
         if isinstance(return_values, tuple):
             return_values = [return_values]
         stubbed_call = Capture(return_values=return_values)
-        monkeypatch.setattr('remoto.process.check', stubbed_call)
+        if module:
+            monkeypatch.setattr(module, string_module, stubbed_call)
+        else:
+            monkeypatch.setattr(string_module, stubbed_call)
         return stubbed_call
 
     return apply
