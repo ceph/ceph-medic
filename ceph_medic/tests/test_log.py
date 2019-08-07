@@ -18,7 +18,7 @@ class TestLogSetup(object):
         config = configuration.load(location)
         with pytest.raises(RuntimeError) as error:
             log.setup(config)
-        assert 'value does not exist' in str(error)
+        assert 'value does not exist' in str(error.value)
 
     def test_create_log_config_correctly(self, tmpdir):
         tmp_log_path = str(tmpdir)
