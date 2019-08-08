@@ -17,3 +17,20 @@ class TestCheckOSDs(object):
     def test_osds_are_found(self):
         metadata['osds'] = {'osd1': {}}
         assert cluster.check_osds_exist() is None
+
+class TestNearfull(object):
+
+    def setup(self):
+        metadata['cluster'] = {}
+
+    def teardown(self):
+        metadata['cluster'] = {}
+
+    def test_key_error_is_ignored(self):
+        assert cluster.check_nearfull() is None
+    def test_osd_map_is_nearfull(self):
+        metadata['cluster'] = {'status': {'osdmap': {'osdmap': {'nearfull': True}}}}
+        assert cluster.check_nearfull() == ('ECLS2', 'Cluster is nearfull')
+    def test_osd_map_is_not_nearfull(self):
+        metadata['cluster'] = {'status': {'osdmap': {'osdmap': {'nearfull': False}}}}
+    
