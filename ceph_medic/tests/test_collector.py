@@ -130,6 +130,7 @@ class TestCollect(object):
             return dict(meta="data")
         monkeypatch.setattr(collector, "get_connection", lambda host: Mock())
         monkeypatch.setattr(collector, "get_node_metadata", mock_metadata)
+        monkeypatch.setattr(collector, "collect_cluster", lambda x: {})
         collector.collect()
         assert "mon0" in metadata["mons"]
         assert "meta" in metadata["mons"]["mon0"]
