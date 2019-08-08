@@ -164,3 +164,5 @@ section::
 
     [global]
     --log-path = .
+
+To ensure that cluster checks run properly, at least one monitor node should have administrative privileges.
