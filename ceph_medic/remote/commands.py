@@ -39,6 +39,24 @@ def ceph_socket_version(conn, socket):
         conn.logger.exception('failed to fetch ceph socket version')
 
 
+def ceph_status(conn):
+    try:                # collects information using ceph -s
+        stdout, stderr, exit_code = check(conn, ['sudo', 'ceph', '-s', '--format', 'json'])
+        result = dict()
+        try:
+            result = json.loads(''.join(stdout))
+        except ValueError:
+            conn.logger.exception("failed to fetch ceph status, invalid json: %s" % ''.join(stdout))
+
+        if exit_code == 0:
+            return result
+        else:
+            return {}
+
+    except RuntimeError:
+        conn.logger.exception('failed to fetch ceph status')
+        
+
 def daemon_socket_config(conn, socket):
     """
     Capture daemon-based config from the socket

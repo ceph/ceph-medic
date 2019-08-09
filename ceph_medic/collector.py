@@ -157,6 +157,8 @@ def collect():
     loader.write('collecting remote node information')
     total_nodes = 0
     failed_nodes = 0
+    has_cluster_data = False
+
     for node_type, nodes in cluster_nodes.items():
         for node in nodes:
             # check if a node type exists for this node before doing any work:
@@ -192,7 +194,14 @@ def collect():
             # send the full node metadata for global scope so that the checks
             # can consume this
             metadata[node_type][hostname] = get_node_metadata(conn, hostname, cluster_nodes)
+            if node_type == 'mons':  # if node type is monitor, admin privileges are most likely authorized
+                if not has_cluster_data:
+                    cluster_data = collect_cluster(conn)
+                if cluster_data:
+                    metadata['cluster'] = cluster_data
+                    has_cluster_data = True
             conn.exit()
+
     if failed_nodes == total_nodes:
         loader.write(terminal.red('Collection failed!') + ' ' *70)
         # TODO: this helps clear out the 'loader' line so that the error looks
@@ -230,6 +239,15 @@ def collect_ceph_info(conn):
     result = dict()
     result['version'] = remote.commands.ceph_version(conn)
     result['installed'] = remote.commands.ceph_is_installed(conn)
+    return result
+
+
+def collect_cluster(conn):
+    """
+    Captures useful cluster information like the status
+    """
+    result = dict()
+    result['status'] = remote.commands.ceph_status(conn)
     return result
 
 

@@ -12,3 +12,11 @@ Errors
 ECLS1
 ^^^^^
 No OSD nodes exist as part of the cluster.
+
+.. _ECLS2:
+
+ECLS2
+^^^^^
+The cluster is nearfull.
+
+
