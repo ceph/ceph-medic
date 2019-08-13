@@ -48,7 +48,10 @@ def get_host_fsids(node_metadata):
     """
     all_fsids = []
     for socket_metadata in node_metadata['ceph']['sockets'].values():
-        fsid = socket_metadata['config'].get('fsid')
+        config = socket_metadata.get('config', {})
+        if not config:
+            continue
+        fsid = config.get('fsid')
         if not fsid:
             continue
         all_fsids.append(fsid)
@@ -177,7 +180,10 @@ def check_rgw_num_rados_handles(host, data):
     sockets = data['ceph']['sockets']
     failed = []
     for socket, socket_data in sockets.items():
-        rgw_num_rados_handles = socket_data['config'].get('rgw_num_rados_handles', 1)
+        config = socket_data.get('config', {})
+        if not config:
+            continue
+        rgw_num_rados_handles = config.get('rgw_num_rados_handles', 1)
         name = socket.split('/var/run/ceph/')[-1]
         rgw_num_rados_handles = str_to_int(rgw_num_rados_handles)
         if rgw_num_rados_handles > 1:
@@ -215,7 +221,10 @@ def check_fsid_per_daemon(host, data):
     sockets = data['ceph']['sockets']
     failed = False
     for socket, socket_data in sockets.items():
-        socket_fsid = socket_data['config'].get('fsid')
+        config = socket_data.get('config', {})
+        if not config:
+            continue
+        socket_fsid = config.get('fsid')
         if not socket_fsid:
             continue
         if socket_fsid != common_fsid:

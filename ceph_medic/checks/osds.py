@@ -57,3 +57,25 @@ def check_min_osd_nodes(host, data):
     osd_nodes = len(metadata['osds'])
     if magical_number > osd_nodes:
         return code, msg % (magical_number, osd_nodes)
+
+
+def check_reasonable_ratios(host, data):
+    code = 'WOSD4'
+    msg = 'Ratios have been modified to unreasonable values: %s'
+    unreasonable_ratios = []
+    reasonable_ratios = {
+      "backfillfull_ratio": 0.9,
+      "nearfull_ratio": 0.85,
+      "full_ratio": 0.95
+    }
+
+    dump = data['ceph']['osd'].get('dump', {})
+    for name, value in reasonable_ratios.items():
+        ratio = dump.get(name)
+        if not ratio:
+            continue
+        if ratio != reasonable_ratios[name]:
+            unreasonable_ratios.append(name)
+    if unreasonable_ratios:
+        msg = msg % ', '.join(sorted(unreasonable_ratios))
+        return code, msg
