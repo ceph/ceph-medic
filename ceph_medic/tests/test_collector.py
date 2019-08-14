@@ -150,5 +150,6 @@ class TestGetNodeMetadata(object):
         monkeypatch.setattr(collector, "collect_network", mock_metadata)
         monkeypatch.setattr(collector, "collect_ceph_info", mock_metadata)
         monkeypatch.setattr(collector, "collect_socket_info", mock_metadata)
+        monkeypatch.setattr(collector, "collect_ceph_osd_info", mock_metadata)
         result = collector.get_node_metadata(Mock(), "mon0", [])
         assert key in result
