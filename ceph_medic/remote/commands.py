@@ -55,7 +55,28 @@ def ceph_status(conn):
 
     except RuntimeError:
         conn.logger.exception('failed to fetch ceph status')
-        
+
+
+def ceph_osd_dump(conn):
+    try:
+        stdout, stderr, exit_code = check(conn, ['sudo', 'ceph', 'osd', 'dump', '--format', 'json'])
+        result = dict()
+        if exit_code != 0:
+            conn.logger.error('could not get osd dump from ceph')
+            if stderr:
+                for line in stderr:
+                    conn.logger.error(line)
+            return result
+        try:
+            result = json.loads(''.join(stdout))
+        except ValueError:
+            conn.logger.exception("failed to fetch osd dump, invalid json: %s" % ''.join(stdout))
+
+        return result
+
+    except RuntimeError:
+        conn.logger.exception('failed to fetch ceph osd dump')
+
 
 def daemon_socket_config(conn, socket):
     """

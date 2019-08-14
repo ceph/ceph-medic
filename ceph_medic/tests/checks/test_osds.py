@@ -66,3 +66,58 @@ class TestMinOSDS(object):
         osd_data['paths']['/etc/ceph']['files']['/etc/ceph/ceph.conf'] = {'contents': contents}
         result = osds.check_min_osd_nodes(None, osd_data)
         assert result is None
+
+
+class TestReasonableRatios(object):
+
+    def setup(self):
+        self.data = {'ceph': {'osd': {'dump': {}}}}
+
+    def test_osd_is_empty(self):
+        data = {'ceph': {'osd': {}}}
+        assert osds.check_reasonable_ratios('node1', data) is None
+
+    def test_ratios_are_all_very_reasonable(self):
+        self.data['ceph']['osd']['dump'] = {
+          "backfillfull_ratio": 0.9,
+          "nearfull_ratio": 0.85,
+          "full_ratio": 0.95
+        }
+        assert osds.check_reasonable_ratios('node1', self.data) is None
+
+    def test_all_ratios_are_messed_up(self):
+        self.data['ceph']['osd']['dump'] = {
+          "backfillfull_ratio": 0.91,
+          "nearfull_ratio": 0.84,
+          "full_ratio": 0.92
+        }
+        code, msg = osds.check_reasonable_ratios('node1', self.data)
+        assert code == 'WOSD4'
+        assert 'backfillfull_ratio, full_ratio, nearfull_ratio' in msg
+
+    def test_backfillfull_is_messed_up(self):
+        self.data['ceph']['osd']['dump'] = {
+          "backfillfull_ratio": 0.91,
+          "nearfull_ratio": 0.85,
+          "full_ratio": 0.95
+        }
+        code, msg = osds.check_reasonable_ratios('node1', self.data)
+        assert msg.endswith('backfillfull_ratio')
+
+    def test_nearfull_is_messed_up(self):
+        self.data['ceph']['osd']['dump'] = {
+          "backfillfull_ratio": 0.9,
+          "nearfull_ratio": 0.88,
+          "full_ratio": 0.95
+        }
+        code, msg = osds.check_reasonable_ratios('node1', self.data)
+        assert msg.endswith('nearfull_ratio')
+
+    def test_full_is_messed_up(self):
+        self.data['ceph']['osd']['dump'] = {
+          "backfillfull_ratio": 0.9,
+          "nearfull_ratio": 0.89,
+          "full_ratio": 0.95
+        }
+        code, msg = osds.check_reasonable_ratios('node1', self.data)
+        assert msg.endswith('full_ratio')
