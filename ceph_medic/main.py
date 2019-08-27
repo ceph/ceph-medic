@@ -25,6 +25,7 @@ Global Options:
   --version, version    Shows the current installed version
   --inventory           Prefer a ceph-ansible inventory (hosts) file instead of default
                         (cwd, /etc/ansible/hosts) locations
+  --verbosity		Set verbosity level of logging output
 
 {sub_help}
 
@@ -85,7 +86,7 @@ Global Options:
     def main(self, argv):
         options = [
             '--cluster', '--ssh-config', '--inventory',
-            '--config',
+            '--config', '--verbosity',
         ]
         parser = Transport(
             argv, options=options,
@@ -145,3 +146,7 @@ Global Options:
         parser.dispatch()
         parser.catches_help()
         parser.catches_version()
+
+	# Verbosity
+	verbosity = parser.get('--verbosity', 'debug')
+	ceph_medic.config.verbosity = verbosity.lowercase()
