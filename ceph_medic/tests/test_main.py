@@ -12,3 +12,11 @@ class TestMain(object):
             ceph_medic.main.Medic(argv)
         out = capsys.readouterr()
         assert 'the given ssh config path does not exist' in out.out
+
+    def test_valid_ssh_config(self, capsys):
+        ssh_config = '/etc/ssh/ssh_config'
+        argv = ["ceph-medic", "--ssh-config", ssh_config]
+        ceph_medic.main.Medic(argv)
+        out = capsys.readouterr()
+        assert out.out == ''
+        assert ssh_config == ceph_medic.main.ceph_medic.config.ssh_config
