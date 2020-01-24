@@ -21,7 +21,7 @@ def get_connection(hostname, username=None, threads=5, use_sudo=None, detect_sud
         hostname = "%s@%s" % (username, hostname)
 
     if ceph_medic.config.ssh_config:
-        hostname = "-F %s %s" % (ceph_medic.config.get('ssh_config'), hostname)
+        hostname = "-F %s %s" % (ceph_medic.config.ssh_config, hostname)
     try:
         deployment_type = ceph_medic.config.file.get_safe('global', 'deployment_type', 'baremetal')
         conn_obj = remoto.connection.get(deployment_type)
