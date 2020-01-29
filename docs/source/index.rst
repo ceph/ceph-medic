@@ -53,9 +53,18 @@ exist, it will look for ``/etc/ansible/hosts`` to be used as the inventory.
 
 Inventory for Containers
 ------------------------
-Containers are usually deployed under *baremetal* hosts, so it is possible to
-define the hosts like a regular inventory, and ceph-medic will connect to
-the containers existing in the host to produce a meaningful report.
+Containerized deployments are also supported, via ``docker`` and ``podman``.
+As with ``baremetal`` deployments, an inventory file is required. If the
+cluster was deployed with ``ceph-ansible``, you may use that existing
+inventory.
+
+To configure ceph-medic to connect to a containerized cluster, the glocal section of the
+configuration needs to define ``deployment_type`` to either ``docker`` or
+``podman``. For example::
+
+    [global]
+
+    deployment_type = podman
 
 
 Inventory for Container Platforms

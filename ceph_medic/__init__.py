@@ -14,7 +14,7 @@ class UnloadedConfig(object):
         raise RuntimeError(self.error)
 
 
-config = namedtuple('config', ['verbosity', 'nodes', 'hosts_file', 'file'])
+config = namedtuple('config', ['verbosity', 'nodes', 'hosts_file', 'file', 'cluster_name'])
 config.file = UnloadedConfig("No valid ceph-medic configuration file was loaded")
 config.nodes = {}
 

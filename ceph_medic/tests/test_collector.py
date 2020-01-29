@@ -128,7 +128,8 @@ class TestCollect(object):
         metadata["cluster_name"] = "ceph"
         def mock_metadata(conn, hostname, cluster_nodes):
             return dict(meta="data")
-        monkeypatch.setattr(collector, "get_connection", lambda host: Mock())
+        monkeypatch.setattr(collector, "get_connection",
+                            lambda host, container=None: Mock())
         monkeypatch.setattr(collector, "get_node_metadata", mock_metadata)
         monkeypatch.setattr(collector, "collect_cluster", lambda x: {})
         collector.collect()

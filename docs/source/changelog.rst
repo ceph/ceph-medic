@@ -1,3 +1,7 @@
+1.0.6
+-----
+* Docker, podman container support
+
 1.0.5
 -----
 27-Jun-2019

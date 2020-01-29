@@ -77,7 +77,10 @@ Configured Nodes:
             ceph_medic.metadata['nodes'][daemon] = []
         for daemon, nodes in ceph_medic.config.nodes.items():
             for node in nodes:
-                ceph_medic.metadata['nodes'][daemon].append({'host': node['host']})
+                node_metadata = {'host': node['host']}
+                if 'container' in node:
+                    node_metadata['container'] = node['container']
+                ceph_medic.metadata['nodes'][daemon].append(node_metadata)
 
         collector.collect()
         test = runner.Runner()

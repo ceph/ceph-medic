@@ -137,6 +137,10 @@ Global Options:
             ceph_medic.config.hosts_file = loaded_hosts.filename
             self.hosts_file = loaded_hosts.filename
 
+            if deployment_type in ['docker', 'podman']:
+                ceph_medic.config.nodes = hosts.basic_containers(
+                        deployment_type)
+
         parser.catch_version = ceph_medic.__version__
         parser.mapper = self.mapper
         parser.catch_help = self.help(parser.subhelp())
