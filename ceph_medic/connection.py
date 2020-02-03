@@ -21,7 +21,7 @@ def get_connection(hostname, username=None, threads=5, use_sudo=None, detect_sud
         hostname = "%s@%s" % (username, hostname)
 
     if ceph_medic.config.ssh_config:
-        hostname = "-F %s %s" % (ceph_medic.config.get('ssh_config'), hostname)
+        hostname = "-F %s %s" % (ceph_medic.config.ssh_config, hostname)
     try:
         deployment_type = ceph_medic.config.file.get_safe('global', 'deployment_type', 'baremetal')
         conn_obj = remoto.connection.get(deployment_type)
@@ -39,6 +39,9 @@ def get_connection(hostname, username=None, threads=5, use_sudo=None, detect_sud
                 threads=threads,
                 detect_sudo=detect_sudo,
             )
+        else:
+            raise RuntimeError(
+                    'Invalid deployment_type: %s' % deployment_type)
         # Set a timeout value in seconds to disconnect and move on
         # if no data is sent back.
         conn.global_timeout = 300

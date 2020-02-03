@@ -149,6 +149,6 @@ Global Options:
 
         # Verbosity
         verbosity = parser.get('--verbosity', 'debug')
-        ceph_medic.config.verbosity = verbosity.lowercase()
+        ceph_medic.config.verbosity = verbosity.lower()
 
 	# testing 'tab' vs 'space' indentation
