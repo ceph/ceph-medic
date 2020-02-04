@@ -2,6 +2,7 @@
 -----
 * Docker, podman container support
 * Fix broken SSH config option
+* Fix querying the Ceph version via admin socket on newer Ceph versions
 
 1.0.5
 -----
