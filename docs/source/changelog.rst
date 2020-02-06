@@ -1,6 +1,7 @@
 1.0.6
 -----
 * Docker, podman container support
+* Fix broken SSH config option
 
 1.0.5
 -----
