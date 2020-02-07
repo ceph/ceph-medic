@@ -178,7 +178,7 @@ def collect():
             # util.net.host_is_resolvable
             try:
                 logger.debug('attempting connection to host: %s', node['host'])
-                conn = get_connection(node['host'])
+                conn = get_connection(node['host'], container=node.get('container'))
                 loader.write('Host: %-40s  connection: [%-20s]' % (hostname, terminal.green('connected')))
                 loader.write('\n')
             except HostNotFound as err:

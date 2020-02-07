@@ -23,7 +23,11 @@ def get_connection(hostname, username=None, threads=5, use_sudo=None, detect_sud
     if ceph_medic.config.ssh_config:
         hostname = "-F %s %s" % (ceph_medic.config.ssh_config, hostname)
     try:
-        deployment_type = ceph_medic.config.file.get_safe('global', 'deployment_type', 'baremetal')
+        deployment_type = kw.get(
+            'deployment_type',
+            ceph_medic.config.file.get_safe(
+                'global', 'deployment_type', 'baremetal')
+        )
         conn_obj = remoto.connection.get(deployment_type)
         if deployment_type in ['k8s', 'kubernetes', 'openshift', 'oc']:
             conn = container_platform_conn(hostname, conn_obj, deployment_type)
@@ -32,6 +36,12 @@ def get_connection(hostname, username=None, threads=5, use_sudo=None, detect_sud
             if code:
                 raise HostNotFound(
                     'Remote connection failed while testing connection:\n %s' % '\n'.join(stderr))
+        elif deployment_type in ['docker', 'podman']:
+            conn = conn_obj(
+                hostname,
+                container_name=kw['container'],
+                detect_sudo=detect_sudo,
+            )
         elif deployment_type in ['ssh', 'baremetal']:
             conn = conn_obj(
                 hostname,

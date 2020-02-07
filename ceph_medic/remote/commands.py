@@ -23,7 +23,7 @@ def ceph_socket_version(conn, socket):
         result = dict()
         output, _, exit_code = check(
             conn,
-            ['ceph', '--admin-daemon', socket, 'version']
+            ['ceph', '--admin-daemon', socket, '--format', 'json', 'version']
         )
         if exit_code != 0:
             conn.logger.error('Non zero exit status received, unable to retrieve information')
