@@ -1,5 +1,7 @@
 1.0.6
 -----
+11-Feb-2020
+
 * Docker, podman container support
 * Fix broken SSH config option
 * Fix querying the Ceph version via admin socket on newer Ceph versions
