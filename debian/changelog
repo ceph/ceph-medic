@@ -1,8 +1,14 @@
+ceph-medic (1.0.7) stable; urgency=medium
+
+  * New upstream release
+
+ -- Ceph Release Team <ceph-maintainers@ceph.com>  Tue, 24 Mar 2020 17:29:00 -0600
+
 ceph-medic (1.0.6) stable; urgency=medium
 
   * New upstream release
 
- -- Ceph Release Team <ceph-maintainers@ceph.com>  Tue, 11 Feb 2018 16:41:07 -0600
+ -- Ceph Release Team <ceph-maintainers@ceph.com>  Tue, 11 Feb 2020 16:41:07 -0600
 
 ceph-medic (1.0.4) stable; urgency=medium
 

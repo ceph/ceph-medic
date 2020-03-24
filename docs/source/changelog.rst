@@ -1,3 +1,9 @@
+1.0.7
+-----
+24-Mar-2020
+
+* Fix test bugs that were breaking rpm builds
+
 1.0.6
 -----
 11-Feb-2020
