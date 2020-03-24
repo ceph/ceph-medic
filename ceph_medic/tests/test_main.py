@@ -12,8 +12,8 @@ class TestMain(object):
         argv = ["ceph-medic", "--ssh-config", "/does/not/exist"]
         with pytest.raises(SystemExit):
             ceph_medic.main.Medic(argv)
-        out = capsys.readouterr()
-        assert 'the given ssh config path does not exist' in out.out
+        out, _ = capsys.readouterr()
+        assert 'the given ssh config path does not exist' in out
 
     def test_valid_ssh_config(self, capsys):
         ssh_config = '/etc/ssh/ssh_config'
