@@ -1,6 +1,8 @@
 import pytest
 import ceph_medic.main
 
+from mock import patch
+
 
 class TestMain(object):
     def test_main(self):
@@ -16,7 +18,17 @@ class TestMain(object):
     def test_valid_ssh_config(self, capsys):
         ssh_config = '/etc/ssh/ssh_config'
         argv = ["ceph-medic", "--ssh-config", ssh_config]
-        ceph_medic.main.Medic(argv)
+
+        def fake_exists(path):
+            if path == ssh_config:
+                return True
+            if path.endswith('cephmedic.conf'):
+                return False
+            return True
+
+        with patch.object(ceph_medic.main.os.path, 'exists') as m_exists:
+            m_exists.side_effect = fake_exists
+            ceph_medic.main.Medic(argv)
         out = capsys.readouterr()
-        assert out.out == ''
+        assert 'tssh config path does not exist' not in out.out
         assert ssh_config == ceph_medic.main.ceph_medic.config.ssh_config
