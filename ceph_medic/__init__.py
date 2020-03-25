@@ -22,4 +22,4 @@ metadata = {'failed_nodes': {}, 'rgws': {}, 'mgrs': {}, 'mdss': {}, 'clients': {
 
 daemon_types = [i for i in metadata.keys() if i not in ('nodes', 'failed_nodes', 'cluster')]
 
-__version__ = '1.0.6'
+__version__ = '1.0.7'
