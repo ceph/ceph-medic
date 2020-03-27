@@ -29,6 +29,6 @@ class TestMain(object):
         with patch.object(ceph_medic.main.os.path, 'exists') as m_exists:
             m_exists.side_effect = fake_exists
             ceph_medic.main.Medic(argv)
-        out = capsys.readouterr()
-        assert 'tssh config path does not exist' not in out.out
+        out, _  = capsys.readouterr()
+        assert 'ssh config path does not exist' not in out
         assert ssh_config == ceph_medic.main.ceph_medic.config.ssh_config
