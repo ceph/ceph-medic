@@ -108,7 +108,7 @@ class TestBasicContainers(object):
         monkeypatch.setattr(
             hosts.ceph_medic.connection, 'get_connection',
             lambda *a, **k: None)
-        fake_list = json.dumps([{'Names': 'mgr0-container'}])
+        fake_list = '\n'.join(['mgr0-container'])
         fake_mgr = json.dumps([{
             'Name': 'mgr0-container',
             'Config': {
