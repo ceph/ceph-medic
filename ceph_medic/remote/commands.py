@@ -41,7 +41,7 @@ def ceph_socket_version(conn, socket):
 
 def ceph_status(conn):
     try:                # collects information using ceph -s
-        stdout, stderr, exit_code = check(conn, ['sudo', 'ceph', '-s', '--format', 'json'])
+        stdout, stderr, exit_code = check(conn, ['ceph', '-s', '--format', 'json'])
         result = dict()
         try:
             result = json.loads(''.join(stdout))
@@ -59,7 +59,7 @@ def ceph_status(conn):
 
 def ceph_osd_dump(conn):
     try:
-        stdout, stderr, exit_code = check(conn, ['sudo', 'ceph', 'osd', 'dump', '--format', 'json'])
+        stdout, stderr, exit_code = check(conn, ['ceph', 'osd', 'dump', '--format', 'json'])
         result = dict()
         if exit_code != 0:
             conn.logger.error('could not get osd dump from ceph')
