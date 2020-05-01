@@ -142,6 +142,6 @@ def basic_containers(deployment_type):
             if role not in label_map:
                 continue
             base_inventory[label_map[role]].append(
-                {'host': host, 'container': detail['Name'], 'group': None}
+                {'host': host, 'container': container_name, 'group': None}
             )
     return base_inventory
