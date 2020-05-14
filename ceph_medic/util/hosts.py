@@ -110,25 +110,25 @@ def basic_containers(deployment_type):
             metal_hosts.add(node['host'])
     for host in metal_hosts:
         logger.debug("listing containers for host %s", host)
-        cmd = [deployment_type, 'container', 'ls', '--format', 'json',
-               '--no-trunc']
+        cmd = [deployment_type, 'container', 'ls', '--format',
+               '"{{ .Names }}"']
         conn = ceph_medic.connection.get_connection(
             host, deployment_type='ssh')
         out, err, code = process.check(conn, cmd)
         if code:
             terminal.error("Unable to list containers on host %s" % host)
             continue
-        container_list = json.loads(''.join(out))
+        container_list = map(lambda i: i.strip('"'), out)
         if not container_list:
             terminal.warning("Host %s had no containers" % host)
             continue
-        for container in container_list:
-            cmd = [deployment_type, 'container', 'inspect', container['Names']]
+        for container_name in container_list:
+            cmd = [deployment_type, 'container', 'inspect', container_name]
             out, err, code = process.check(conn, cmd)
             if code:
                 terminal.error(
                     "Unable to inspect container %s on host %s" %
-                    (container['Names'], host)
+                    (container_name, host)
                 )
                 continue
             detail = json.loads(''.join(out))[0]
@@ -142,6 +142,6 @@ def basic_containers(deployment_type):
             if role not in label_map:
                 continue
             base_inventory[label_map[role]].append(
-                {'host': host, 'container': detail['Name'], 'group': None}
+                {'host': host, 'container': container_name, 'group': None}
             )
     return base_inventory
