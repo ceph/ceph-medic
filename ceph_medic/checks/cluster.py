@@ -12,15 +12,16 @@ def check_osds_exist():
     if not osd_count:
         return code, msg
 
+
 def check_nearfull():
-        """
-        Checks if the osd capacity is at nearfull
-        """
-        code = 'ECLS2'
-        msg = 'Cluster is nearfull'
-        try:
-                osd_map = metadata['cluster']['status']['osdmap']['osdmap']
-        except KeyError:
-                return
-        if osd_map['nearfull']:
-                return code, msg
+    """
+    Checks if the osd capacity is at nearfull
+    """
+    code = 'ECLS2'
+    msg = 'Cluster is nearfull'
+    try:
+        osd_map = metadata['cluster']['status']['osdmap']['osdmap']
+    except KeyError:
+        return
+    if osd_map['nearfull']:
+        return code, msg
