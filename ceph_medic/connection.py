@@ -37,9 +37,12 @@ def get_connection(hostname, username=None, threads=5, use_sudo=None, detect_sud
                 raise HostNotFound(
                     'Remote connection failed while testing connection:\n %s' % '\n'.join(stderr))
         elif deployment_type in ['docker', 'podman']:
+            if kw.get('logger', True):
+                remote_logger = logging.getLogger(kw['container'])
             conn = conn_obj(
                 hostname,
                 container_name=kw['container'],
+                logger=remote_logger,
                 detect_sudo=detect_sudo,
             )
         elif deployment_type in ['ssh', 'baremetal']:
