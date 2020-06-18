@@ -1,3 +1,9 @@
+1.0.8
+-----
+17-Jun-2020
+
+* Fix issues with podman support
+
 1.0.7
 -----
 24-Mar-2020
